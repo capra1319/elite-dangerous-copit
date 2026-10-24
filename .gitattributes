@@ -1,0 +1,11 @@
+* text=auto eol=lf
+*.go text eol=lf
+*.mod text eol=lf
+*.sum text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+*.cmd text eol=crlf
+*.binds text eol=crlf
+*.png binary
+*.gif binary

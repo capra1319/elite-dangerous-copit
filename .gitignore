@@ -1,0 +1,28 @@
+# Local builds, test output and caches
+*.exe
+*.test
+*.out
+coverage.*
+/bin/
+/dist/
+/tmp/
+/.cache/
+
+# Local logs, journal snapshots and preferences
+*.log
+*.tmp
+.settings-*.json
+/Status.json
+/NavRoute.json
+/settings.json
+/engineering-goals.json
+/fire-groups.json
+
+# Local editor and agent state
+/.idea/
+/.vscode/
+/.agents/
+/.codex/
+.env
+.env.*
+!.env.example
