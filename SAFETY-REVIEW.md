@@ -26,7 +26,7 @@ Reviewed the Windows amd64 application, terminal session runner, real-game contr
 
 ## Verification
 
-- All **84 standard tests** pass with `go test ./...`; `go vet ./...` passes.
+- All **88 standard tests** pass with `go test ./...`; `go vet ./...` passes. This includes four boot-animation tests added after the original shutdown review; the boot timer uses the same session-owned cancellation/joining mechanism.
 - Added tests cover task cancellation/joining, rejection of late work, panic cleanup/error reporting, real TUI session Quit, blocked mock input, cancellation before file/input actions, stale hotkeys and counter wraparound, key-release error reporting, bounded journal records and Windows pipe-handle ownership.
 - The concurrent worker/input shutdown tests also passed 20 repetitions.
 - The opt-in desktop tests passed for **normal cancellation, an injected backend panic, forced termination of a disarmed test subprocess, and partial hotkey-registration failure**. Arm/stop/page hotkeys could be registered again after process exit. The existing global page-key test passed too. These tests never armed the controller or called SendInput.

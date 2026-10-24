@@ -157,6 +157,8 @@ func (m cockpitModel) render(width, height int) string {
 	default:
 		if m.fatal != nil {
 			body = m.panel(w, m.palette().Danger, bold("CONNECTION STOPPED", m.palette().Danger), m.fatal.Error(), "Close the app, resolve the error, then relaunch.", "Tab opens Diagnostics. F1 opens Help.")
+		} else if m.bootActive {
+			body = m.bootScreen(w, budget)
 		} else if m.scanning() {
 			body = m.connectionScanner(w, budget)
 		} else if w >= 100 && height >= 34 {

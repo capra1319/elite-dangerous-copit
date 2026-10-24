@@ -18,6 +18,7 @@ type cockpitOptions struct {
 	settings                     string
 	journal, goals, firegroups   string
 	interval, stale              time.Duration
+	boot                         bool
 }
 
 const (
@@ -90,6 +91,9 @@ type cockpitModel struct {
 	fireGroupMessage           string
 	fireGroupLoadError         bool
 	hardpointIndex, groupIndex int
+	bootActive                 bool
+	bootStarted                time.Time
+	bootElapsed                time.Duration
 }
 
 func cloneSnapshot(s *Snapshot) *Snapshot {
@@ -129,6 +133,7 @@ func newCockpit(opts cockpitOptions, now time.Time) cockpitModel {
 		opts.stale = time.Minute
 	}
 	m := cockpitModel{opts: opts, now: now, width: 110, height: 36, held: make(map[rune]bool)}
+	m.bootActive, m.bootStarted = opts.boot, now
 	selection, err := loadUISettings(opts.settings)
 	m.themeChoice, m.savedTheme = selection, selection
 	if err != nil {
@@ -162,6 +167,9 @@ func (m cockpitModel) tickCockpit() tea.Cmd {
 }
 func (m cockpitModel) Init() tea.Cmd {
 	commands := []tea.Cmd{m.tickCockpit(), m.backend, m.pollCompanion(false)}
+	if m.bootActive {
+		commands = append(commands, m.tickBoot())
+	}
 	if m.opts.mode != "mock" {
 		commands = append(commands, m.work.command(0, func() tea.Msg { return gamePresenceMsg(probeGamePresence()) }))
 	}
@@ -245,6 +253,16 @@ func (m *cockpitModel) mockAction(command string) {
 
 func (m cockpitModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case bootMsg:
+		if !m.bootActive {
+			return m, nil
+		}
+		m.bootElapsed = max(m.bootElapsed, time.Time(msg).Sub(m.bootStarted))
+		if m.bootElapsed >= bootDuration {
+			m.bootActive = false
+			return m, nil
+		}
+		return m, m.tickBoot()
 	case tea.WindowSizeMsg:
 		if msg.Width > 0 && msg.Height > 0 {
 			m.width, m.height = msg.Width, msg.Height
@@ -258,6 +276,7 @@ func (m cockpitModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		scan := m.continueScanning()
 		return m, tea.Batch(m.tickCockpit(), scan)
 	case pageStepMsg:
+		m.bootActive = false
 		m.stepPage(int(msg))
 		return m, nil
 	case scanMsg:
@@ -285,6 +304,9 @@ func (m cockpitModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		m.frame = msg
+		if msg.ControlStatus == "ARMED" {
+			m.bootActive = false
+		}
 		m.record(msg.Action)
 		m.updateConnection()
 		scan := m.continueScanning()
@@ -329,6 +351,12 @@ func (m cockpitModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case tea.KeyPressMsg:
 		key := msg.Key()
+		if m.bootActive && !key.IsRepeat {
+			m.bootActive = false
+			if key.Mod == 0 && (key.Code == ' ' || key.Code == tea.KeyEnter || key.Code == tea.KeyKpEnter) {
+				return m, nil
+			}
+		}
 		if delta := numpadPageStep(key); delta != 0 {
 			// Control mode receives page keys through WM_HOTKEY;
 			// do not also apply a terminal key event for the same physical press.
@@ -543,6 +571,7 @@ func runCockpit(ctx context.Context, opts cockpitOptions, input io.Reader, outpu
 // returning. No real reader or control engine survives entry into the simulator.
 func runCockpitSessions(ctx context.Context, opts cockpitOptions, session func(cockpitOptions) (cockpitModel, error)) error {
 	realOpts := opts
+	realOpts.boot = false
 	if realOpts.mode == "mock" {
 		realOpts.mode, realOpts.controls = "control", "numpad"
 	}
@@ -558,6 +587,7 @@ func runCockpitSessions(ctx context.Context, opts cockpitOptions, session func(c
 			opts = realOpts
 		} else {
 			opts.mode, opts.controls = "mock", "numpad"
+			opts.boot = false
 		}
 	}
 	return nil

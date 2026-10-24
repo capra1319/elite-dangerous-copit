@@ -43,6 +43,7 @@ func run(args []string, input io.Reader, output, errout io.Writer) int {
 	goals := fs.String("goals", "", "engineering targets file (default: engineering-goals.json beside appearance settings)")
 	firegroups := fs.String("fire-groups", "", "manual fire-group reference file (default: fire-groups.json beside appearance settings)")
 	ui := fs.String("ui", "tui", "interface: tui (Bubble Tea cockpit) or classic")
+	boot := fs.Bool("boot", true, "show the brief terminal boot animation (use -boot=false to skip)")
 	path := fs.String("status", defaultStatusPath(), "path to Elite Dangerous Status.json")
 	once := fs.Bool("once", false, "print one snapshot and exit")
 	plain := fs.Bool("plain", false, "print snapshots without clearing the terminal")
@@ -109,7 +110,7 @@ func run(args []string, input io.Reader, output, errout io.Writer) int {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if *ui == "tui" && !*plain && !*once && input == os.Stdin && output == os.Stdout {
-		if err := runCockpit(ctx, cockpitOptions{mode: *mode, controls: *controls, path: *path, config: *config, settings: *settings, journal: *journal, goals: *goals, firegroups: *firegroups, interval: *interval, stale: *stale}, input, output); err != nil {
+		if err := runCockpit(ctx, cockpitOptions{mode: *mode, controls: *controls, path: *path, config: *config, settings: *settings, journal: *journal, goals: *goals, firegroups: *firegroups, interval: *interval, stale: *stale, boot: *boot}, input, output); err != nil {
 			fmt.Fprintln(errout, err)
 			return 1
 		}
