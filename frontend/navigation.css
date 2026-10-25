@@ -1,0 +1,39 @@
+/* Page labels grow with the menu; portrait navigation uses the available width. */
+:root {
+  --navigation-label-size: clamp(13px, calc(9px + .65vw), 26px);
+  --navigation-rail-width: clamp(188px, 17vw, 340px);
+}
+.shell { grid-template-columns: var(--navigation-rail-width) minmax(0,1fr); }
+#navigation { gap: .4em; }
+#navigation button {
+  min-width: 0;
+  flex-shrink: 0;
+  gap: .65em;
+  padding: .7em .55em;
+  font-size: var(--navigation-label-size);
+  font-weight: 500;
+  line-height: 1.3;
+}
+#navigation .navigation-index {
+  flex-shrink: 0;
+  font-size: .72em;
+}
+#navigation .navigation-label {
+  display: block;
+  min-width: 0;
+  color: inherit;
+  font: inherit;
+  white-space: nowrap;
+}
+.side-label { font-size: max(11px, calc(var(--navigation-label-size) * .65)); }
+.side-footer { font-size: max(9px, calc(var(--navigation-label-size) * .55)); }
+.page-heading h1 { font-size: calc(var(--navigation-label-size) * 1.65); }
+.heading-tools button { font-size: max(12px, calc(var(--navigation-label-size) * .7)); }
+:root[data-orientation="portrait"] {
+  --navigation-label-size: clamp(11px, 1.6vw, 24px);
+}
+:root[data-orientation="portrait"] #navigation button { padding: .75em .3em; }
+:root[data-orientation="portrait"] #navigation .navigation-index { display: none; }
+@media (max-width:520px) {
+  :root[data-orientation="portrait"] #navigation { grid-template-columns: repeat(3,minmax(0,1fr)); }
+}

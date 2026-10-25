@@ -28,7 +28,7 @@ func TestLifecycleHelperProcess(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	requests := make(chan string)
+	requests := make(chan controlRequest)
 	close(requests) // A closed UI request channel must not starve cancellation/polling.
 	ready := false
 	msg := safeBackend(func() tea.Msg {

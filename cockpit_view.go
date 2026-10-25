@@ -121,13 +121,15 @@ func (m cockpitModel) render(width, height int) string {
 		armed, armColour = "DISARMED", m.palette().Warning
 		if m.frame.ControlStatus == "ARMED" {
 			armed, armColour = "● ARMED", m.sessionIndicator().colour
+		} else if m.frame.ControlStatus == "PAUSED" {
+			armed = "PAUSED"
 		}
 	}
 	link, linkColour := m.linkState()
 	if m.opts.mode == "control" && strings.Contains(m.frame.Quality, "SETUP:") {
 		link, linkColour = "SETUP NEEDED", m.palette().Warning
 	}
-	title := between(bold("ELITE", m.palette().Accent)+bold(" // AUX", m.palette().Text), m.chip(mode, modeColour)+"  "+m.chip(armed, armColour), w)
+	title := between(bold("ELITE // AUX", m.palette().Accent)+ink("  FLIGHT TERMINAL", m.palette().Muted), m.chip(mode, modeColour)+"  "+m.chip(armed, armColour), w)
 	context := "Awaiting ship telemetry"
 	if m.frame.State != nil {
 		context = m.frame.State.context()
@@ -156,7 +158,7 @@ func (m cockpitModel) render(width, height int) string {
 		body = m.hardpointsPage(w)
 	default:
 		if m.fatal != nil {
-			body = m.panel(w, m.palette().Danger, bold("CONNECTION STOPPED", m.palette().Danger), m.fatal.Error(), "Close the app, resolve the error, then relaunch.", "Tab opens Diagnostics. F1 opens Help.")
+			body = m.panel(w, m.palette().Danger, bold("CONNECTION STOPPED", m.palette().Danger), m.fatal.Error(), "Close the app, resolve the error, then relaunch.", "Open Diagnostics from the tabs. F1 opens Help.")
 		} else if m.bootActive {
 			body = m.bootScreen(w, budget)
 		} else if m.scanning() {
@@ -527,6 +529,20 @@ func (m cockpitModel) activityPanel(width, count int) string {
 }
 
 func (m cockpitModel) footer(width int) string {
+	if m.page == pageNavigation && m.outfitting.Active {
+		return m.outfittingFooter(width)
+	}
+	if m.page == pageNavigation && m.stationSearchActive {
+		message := m.stationSearchMessage
+		if message == "" {
+			message = "Check update age. No live mission-board preview."
+		}
+		stop := "Tab pages  Q exit"
+		if m.opts.mode == "control" {
+			stop = "Ctrl+Alt+F9 arm/disarm  Ctrl+Alt+F10 STOP"
+		}
+		return padLine(ink(message, m.palette().Accent), width) + "\n" + padLine(ink(stop, m.palette().Muted), width) + "\n" + padLine(ink("↑↓ category  Enter opens browser  Esc back", m.palette().Text), width)
+	}
 	last := padLine(ink("LAST  ", m.palette().Muted)+ink(m.frame.Action, m.palette().Text), width) + "\n"
 	if m.page == pageHardpoints {
 		status := m.fireGroupMessage
@@ -546,7 +562,7 @@ func (m cockpitModel) footer(width int) string {
 			status = "Engineering targets · saved separately from game controls"
 		}
 		if m.materialSearching {
-			status = "SEARCH / " + safeText(m.materialFilter) + "▏  Enter finish / Esc clear"
+			status = "SEARCH > " + safeText(m.materialFilter) + "▏  Enter target / Esc clear"
 		}
 		if m.goalEditing {
 			status = "TARGET > " + string(m.goalDigits) + "▏  Enter save / Esc cancel"
@@ -556,7 +572,7 @@ func (m cockpitModel) footer(width int) string {
 			control = "Ctrl+Alt+F9 arm/disarm  Ctrl+Alt+F10 STOP"
 		}
 		return padLine(ink(status, m.palette().Accent), width) + "\n" + padLine(ink(control, m.palette().Muted), width) + "\n" +
-			padLine(ink("Enter target  / search  P pinned/all  Del unpin  ↑↓ select", m.palette().Text), width)
+			padLine(ink("Type search  ↑↓ select  Enter target  F2 all/pinned  +/-", m.palette().Text), width)
 	}
 	if m.page == pageSettings {
 		status := "THEME  " + m.palette().Name
@@ -624,6 +640,6 @@ func (m cockpitModel) diagnostics(width int) string {
 	return m.panel(width, m.palette().Border, lines...) + "\n" + m.activityPanel(width, 4)
 }
 func (m cockpitModel) help(width int) string {
-	lines := []string{bold("YOUR AUXILIARY FLIGHT PANEL", m.palette().Accent), "", m.section("CONTROLS BY CATEGORY"), "Flight & Utility:  1 Landing gear, 2 Cargo scoop", "Visibility:        3 Ship lights, 5 Night vision", "Combat:            4 Hardpoints, 8 Fire group, 9 Heat sink, 0 Chaff", "Navigation:        6 Galaxy map, 7 System map", "", m.section("REAL GAME CONTROL"), "Ctrl+Alt+F9   Arm/disarm while Elite is focused", "Ctrl+Alt+F10  Stop sending commands", "Switching away from Elite automatically disarms the panel.", "Select EliteAuxPanel under Ship Controls before arming.", "The matching map key closes its map. Disarm before chat/menus.", "", m.section("MOCK / TRAINING (OPT-IN)"), "F4 toggles mock mode on/off while this app is focused.", "Real controls stop before simulation. Returning starts disarmed.", "F2 cycles flight scenarios. F3 switches typed commands / numpad.", "Typed examples: t1 on, t3 toggle, b1, external t1 off, fail.", "No mock action sends input to the game.", "", m.section("FEEDBACK"), "Toggles report ACTIVE / INACTIVE; missing data stays UNKNOWN.", "Active, inactive, waiting and warnings use each theme's colours.", "LEDs follow telemetry. Failed requests are not retried.", "Heat sink / chaff are consumables in real-game mode.", "", m.section("APPEARANCE"), "F5 opens Settings. Up/Down previews the three themes.", "Enter saves. Esc cancels an unsaved preview.", "", m.section("COMPANION PAGES"), "F6 Ship   F7 Navigation   F8 Missions", "F9 Engineering   F10 Hardpoints / fire groups", "Hardpoints: arrows select module/group; 0/1/2 set reference.", "Delete clears a reference. Game assignments are not exported.", "Tab / Shift+Tab cycles every page. Up/Down or PgUp/PgDn scroll.", "Engineering: / searches materials, P toggles pinned/all.", "Enter edits a target quantity. Enter saves; Esc cancels.", "Delete removes a target. Counts follow reported inventory.", "Hull and module health are last reported, not continuous.", "Mission details depend on available acceptance records.", "", m.section("NUMPAD PAGE KEYS"), "Num+ moves to the next page. Num- moves to the previous page.", "In real-control mode they also work while Elite is focused.", "Page keys never arm controls or send flight commands."}
+	lines := []string{bold("YOUR AUXILIARY FLIGHT PANEL", m.palette().Accent), "", m.section("CONTROLS BY CATEGORY"), "Flight & Utility:  1 Landing gear, 2 Cargo scoop", "Visibility:        3 Ship lights, 5 Night vision", "Combat:            4 Hardpoints, 8 Fire group, 9 Heat sink, 0 Chaff", "Navigation:        6 Galaxy map, 7 System map", "", m.section("REAL GAME CONTROL"), "Ctrl+Alt+F9   Arm/disarm while Elite is focused", "Ctrl+Alt+F10  Stop sending commands", "Focus loss pauses; returning to the same game resumes. STOP cancels.", "Select EliteAuxPanel under Ship Controls before arming.", "The matching map key closes its map. Disarm before chat/menus.", "", m.section("MOCK / TRAINING (OPT-IN)"), "F4 toggles mock mode on/off while this app is focused.", "Real controls stop before simulation. Returning starts disarmed.", "F2 cycles flight scenarios. F3 switches typed commands / numpad.", "Typed examples: t1 on, t3 toggle, b1, external t1 off, fail.", "No mock action sends input to the game.", "", m.section("FEEDBACK"), "Toggles report ACTIVE / INACTIVE; missing data stays UNKNOWN.", "Active, inactive, waiting and warnings use each theme's colours.", "LEDs follow telemetry. Failed requests are not retried.", "Heat sink / chaff are consumables in real-game mode.", "", m.section("APPEARANCE"), "F5 opens Settings. Up/Down previews the three themes.", "Enter saves. Esc cancels an unsaved preview.", "", m.section("COMPANION PAGES"), "F6 Ship   F7 Navigation   F8 Missions", "F9 Engineering   F10 Hardpoints / fire groups", "Hardpoints: arrows select module/group; 0/1/2 set reference.", "Delete clears a reference. Game assignments are not exported.", "Tab / Shift+Tab cycles every page. Up/Down or PgUp/PgDn scroll.", "Engineering: type to search, F2 switches all/pinned.", "Enter edits a target; type quantity, Enter saves, Esc cancels.", "+/- adjusts a target; Delete removes it. Esc clears search.", "Hull and module health are last reported, not continuous.", "Mission details depend on available acceptance records.", "", m.section("NUMPAD PAGE KEYS"), "Num+ moves to the next page. Num- moves to the previous page.", "In real-control mode they also work while Elite is focused.", "Page keys never arm controls or send flight commands."}
 	return m.panel(width, m.palette().Border, lines...)
 }

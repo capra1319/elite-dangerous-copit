@@ -21,7 +21,7 @@ type display struct {
 	controlStatus string
 	screen        *terminalScreen
 	publish       func(dashboardFrame)
-	requests      <-chan string
+	requests      <-chan controlRequest
 	pending       string
 	gameFocused   bool
 	navigate      func(int)
@@ -29,8 +29,6 @@ type display struct {
 }
 
 const defaultTelemetryInterval = 100 * time.Millisecond
-
-func main() { os.Exit(run(os.Args[1:], os.Stdin, os.Stdout, os.Stderr)) }
 
 func run(args []string, input io.Reader, output, errout io.Writer) int {
 	fs := flag.NewFlagSet("eliteaux", flag.ContinueOnError)

@@ -12,6 +12,8 @@ import (
 	"syscall"
 	"time"
 	"unsafe"
+
+	"golang.org/x/sys/windows"
 )
 
 var controlUser32 = syscall.NewLazyDLL("user32.dll")
@@ -36,10 +38,54 @@ func foregroundGame() gameTarget {
 		return gameTarget{}
 	}
 	t := gameTarget{Window: hwnd, PID: pid, Path: syscall.UTF16ToString(buf[:size])}
+	var created, exited, kernel, user windows.Filetime
+	if err := windows.GetProcessTimes(windows.Handle(h), &created, &exited, &kernel, &user); err != nil {
+		return gameTarget{}
+	}
+	t.Created = uint64(created.HighDateTime)<<32 | uint64(created.LowDateTime)
 	if !t.valid() {
 		return gameTarget{}
 	}
 	return t
+}
+
+func gameSessionAlive(target gameTarget) bool {
+	if !target.valid() || target.Created == 0 {
+		return false
+	}
+	h, err := windows.OpenProcess(windows.PROCESS_QUERY_LIMITED_INFORMATION|windows.SYNCHRONIZE, false, target.PID)
+	if err != nil {
+		return false
+	}
+	defer windows.CloseHandle(h)
+	status, err := windows.WaitForSingleObject(h, 0)
+	if err != nil || status != uint32(windows.WAIT_TIMEOUT) {
+		return false
+	}
+	var created, exited, kernel, user windows.Filetime
+	if windows.GetProcessTimes(h, &created, &exited, &kernel, &user) != nil {
+		return false
+	}
+	return target.Created == uint64(created.HighDateTime)<<32|uint64(created.LowDateTime)
+}
+
+func focusGameSession(target gameTarget) bool {
+	if !gameSessionAlive(target) {
+		return false
+	}
+	ok, _, _ := controlUser32.NewProc("SetForegroundWindow").Call(target.Window)
+	return ok != 0 && foregroundGame() == target
+}
+
+func resumeKeysReleased() bool {
+	for _, vk := range []uintptr{0x10, 0x11, 0x12, 0x5b, 0x5c, 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69,
+		0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79} {
+		held, _, _ := controlUser32.NewProc("GetAsyncKeyState").Call(vk)
+		if held&0x8000 != 0 {
+			return false
+		}
+	}
+	return true
 }
 
 // INPUT is 40 bytes on amd64; its union is aligned at offset 8.
@@ -141,8 +187,11 @@ func runControl(ctx context.Context, d display, path, configPath string, interva
 			c.update(nil, readErr, time.Now(), foregroundGame())
 		}
 		profileErr := profileReady(config)
-		if profileErr != nil && c.Armed {
+		if profileErr != nil && (c.Armed || c.ResumeTarget.valid()) {
 			c.disarm(profileErr.Error())
+		}
+		if c.ResumeTarget.valid() && !gameSessionAlive(c.ResumeTarget) {
+			c.disarm("game closed or restarted; arm again")
 		}
 		return profileErr
 	}
@@ -154,6 +203,8 @@ func runControl(ctx context.Context, d display, path, configPath string, interva
 		status := "DISARMED"
 		if c.Armed {
 			status = "ARMED"
+		} else if c.ResumeTarget.valid() {
+			status = "PAUSED"
 		}
 		d.controlStatus = status
 		d.pending = ""
@@ -244,6 +295,22 @@ func runControl(ctx context.Context, d display, path, configPath string, interva
 	nextDraw := time.Now().Add(time.Second)
 	requests := d.requests
 	var armedSince uint32
+	markArmed := func() {
+		ticks, _, _ := controlKernel32.NewProc("GetTickCount").Call()
+		armedSince = uint32(ticks)
+	}
+	resumeControls := func() {
+		if !resumeKeysReleased() {
+			return
+		}
+		if c.resume(foregroundGame(), time.Now(), profileErr) {
+			if err := addActions(); err != nil {
+				c.disarm(err.Error())
+			} else {
+				markArmed()
+			}
+		}
+	}
 	for {
 		if ctx.Err() != nil {
 			c.disarm("app closing")
@@ -259,9 +326,47 @@ func runControl(ctx context.Context, d display, path, configPath string, interva
 				requests = nil
 				continue
 			}
-			if request == "disarm" {
+			if request.Kind == "stop" {
 				c.disarm("user stop from dashboard")
 				removeActions()
+				show()
+			} else if request.Kind == "action" {
+				// UI clicks are short-lived deliberate requests, never replayed on focus return.
+				age := time.Since(request.Created)
+				if age < 0 || age > 300*time.Millisecond {
+					c.Last = "Blocked: click expired; press again"
+					show()
+					continue
+				}
+				target := c.Target
+				if !c.Armed {
+					target = c.ResumeTarget
+				}
+				if !target.valid() {
+					c.Last = "Blocked: manually arm in Elite first"
+					show()
+					continue
+				}
+				if !focusGameSession(target) {
+					c.Last = "Blocked: could not focus the authorised game session"
+					show()
+					continue
+				}
+				profileErr = refresh()
+				if !c.Armed {
+					resumeControls()
+				}
+				if time.Since(request.Created) > 300*time.Millisecond {
+					c.Last = "Blocked: click expired while focusing; press again"
+					show()
+					continue
+				}
+				if err := c.trigger(ctx, request.Action, time.Now(), foregroundGame(), profileErr); err != nil {
+					c.Last = "Blocked: " + err.Error()
+				}
+				if !c.Armed {
+					removeActions()
+				}
 				show()
 			}
 			continue
@@ -269,12 +374,15 @@ func runControl(ctx context.Context, d display, path, configPath string, interva
 		}
 		now := time.Now()
 		if c.Armed && foregroundGame() != c.Target {
-			c.disarm("game lost focus")
+			c.observeFocus(foregroundGame())
 			removeActions()
 			show()
 		}
 		if !now.Before(nextRead) {
 			profileErr = refresh()
+			if c.ResumeTarget.valid() {
+				resumeControls()
+			}
 			if !c.Armed {
 				removeActions()
 			}
@@ -321,7 +429,7 @@ func runControl(ctx context.Context, d display, path, configPath string, interva
 				continue
 			}
 			if id == 1 {
-				if c.Armed {
+				if c.Armed || c.ResumeTarget.valid() {
 					c.disarm("user toggle")
 					removeActions()
 				} else {
@@ -335,8 +443,7 @@ func runControl(ctx context.Context, d display, path, configPath string, interva
 					} else if err := addActions(); err != nil {
 						c.disarm(err.Error())
 					} else {
-						ticks, _, _ := controlKernel32.NewProc("GetTickCount").Call()
-						armedSince = uint32(ticks)
+						markArmed()
 					}
 				}
 				show()

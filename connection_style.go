@@ -25,6 +25,8 @@ func (m cockpitModel) sessionIndicator() sessionIndicator {
 		control = "DISARMED"
 		if m.frame.ControlStatus == "ARMED" {
 			control = "ARMED"
+		} else if m.frame.ControlStatus == "PAUSED" {
+			control = "PAUSED"
 		}
 	}
 	if m.fatal != nil {
@@ -45,6 +47,9 @@ func (m cockpitModel) sessionIndicator() sessionIndicator {
 	}
 	if m.opts.mode == "control" && m.frame.ControlStatus == "ARMED" {
 		return sessionIndicator{label: ">>> CONNECTED | ARMED <<<", detail: "GAME CONTROLS ACTIVE", colour: p.Success, ready: true, armed: true}
+	}
+	if m.opts.mode == "control" && m.frame.ControlStatus == "PAUSED" {
+		return sessionIndicator{label: "CONNECTED | PAUSED", detail: "Return to Elite to resume; STOP cancels", colour: p.Warning, ready: true}
 	}
 	if m.opts.mode == "control" {
 		return sessionIndicator{label: "CONNECTED | DISARMED", detail: "Controls locked", colour: p.Warning, ready: true}

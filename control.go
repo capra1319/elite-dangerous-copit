@@ -204,9 +204,31 @@ func profileReady(c controlConfig) error {
 }
 
 type gameTarget struct {
-	Window uintptr
-	PID    uint32
-	Path   string
+	Window  uintptr
+	PID     uint32
+	Path    string
+	Created uint64 // Process creation time distinguishes a restarted/reused PID.
+}
+
+type controlRequest struct {
+	Kind, Action string
+	Created      time.Time
+}
+
+// A deliberate Stop replaces waiting UI actions. The UI owns the sole producer.
+func requestStop(requests chan controlRequest) {
+	if requests == nil {
+		return
+	}
+	for {
+		select {
+		case <-requests:
+			continue
+		default:
+			requests <- controlRequest{Kind: "stop"}
+			return
+		}
+	}
 }
 
 func (t gameTarget) valid() bool {
@@ -225,24 +247,66 @@ type pendingRequest struct {
 }
 
 type controlEngine struct {
-	Config     controlConfig
-	Sink       pulseSink
-	State      *Snapshot
-	ReadError  error
-	Sample     uint64
-	Armed      bool
-	Target     gameTarget
-	Pending    *pendingRequest
-	Last       string
-	lastSent   time.Time
-	StaleAfter time.Duration
+	Config       controlConfig
+	Sink         pulseSink
+	State        *Snapshot
+	ReadError    error
+	Sample       uint64
+	Armed        bool
+	Target       gameTarget
+	ResumeTarget gameTarget
+	Pending      *pendingRequest
+	Last         string
+	lastSent     time.Time
+	StaleAfter   time.Duration
 }
 
 func (c *controlEngine) disarm(reason string) {
 	c.Armed = false
 	c.Pending = nil
 	c.Target = gameTarget{}
+	c.ResumeTarget = gameTarget{}
 	c.Last = "DISARMED: " + reason
+}
+
+// Pausing keeps only the manually authorised game session, never a queued action.
+func (c *controlEngine) observeFocus(target gameTarget) {
+	if c.Armed && target != c.Target {
+		if target.valid() {
+			c.disarm("game session changed; arm again")
+			return
+		}
+		c.ResumeTarget, c.Target = c.Target, gameTarget{}
+		c.Armed, c.Pending = false, nil
+		c.Last = "PAUSED: return to Elite to resume; Stop cancels auto-resume"
+	}
+	if c.ResumeTarget.valid() && target.valid() && target != c.ResumeTarget {
+		c.disarm("game session changed; arm again")
+	}
+}
+
+func (c *controlEngine) resume(target gameTarget, now time.Time, profileErr error) bool {
+	if !c.ResumeTarget.valid() {
+		return false
+	}
+	if profileErr != nil {
+		c.disarm(profileErr.Error())
+		return false
+	}
+	if err := c.telemetryUsable(now); err != nil {
+		c.disarm(err.Error())
+		return false
+	}
+	c.observeFocus(target)
+	if !c.ResumeTarget.valid() || target != c.ResumeTarget || *c.State.GuiFocus != 0 {
+		return false
+	}
+	if err := c.arm(target, now, nil); err != nil {
+		c.disarm(err.Error())
+		return false
+	}
+	c.Last = "ARMED: same game session focused again; no previous action replayed"
+	return true
 }
 
 func (c *controlEngine) update(s *Snapshot, err error, now time.Time, target gameTarget) {
@@ -258,15 +322,12 @@ func (c *controlEngine) update(s *Snapshot, err error, now time.Time, target gam
 		}
 		c.State = cloneSnapshot(s)
 	}
-	if c.Armed {
-		if target != c.Target {
-			c.disarm("game lost focus or restarted")
-			return
-		}
+	if c.Armed || c.ResumeTarget.valid() {
 		if err := c.telemetryUsable(now); err != nil {
 			c.disarm(err.Error())
 			return
 		}
+		c.observeFocus(target)
 	}
 	if p := c.Pending; p != nil {
 		if c.Sample > p.Baseline && c.State != nil && c.State.has(p.Action.Mask) == p.Desired {
@@ -317,6 +378,7 @@ func (c *controlEngine) arm(target gameTarget, now time.Time, profileErr error) 
 		return errors.New("close ship panels/maps and chat before arming")
 	}
 	c.Target = target
+	c.ResumeTarget = gameTarget{}
 	c.Armed = true
 	c.Pending = nil
 	c.Last = "ARMED: numpad controls operate Elite Dangerous while this game stays focused"
@@ -332,7 +394,7 @@ func (c *controlEngine) trigger(ctx context.Context, id string, now time.Time, t
 		return errors.New("disarmed; focus the cockpit and press Ctrl+Alt+F9")
 	}
 	if target != c.Target || !target.valid() {
-		c.disarm("game is not foreground")
+		c.observeFocus(target)
 		return errors.New(c.Last)
 	}
 	if profileErr != nil {

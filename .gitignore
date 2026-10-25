@@ -26,3 +26,12 @@ coverage.*
 .env
 .env.*
 !.env.example
+/build/bin/
+/frontend/wailsjs/
+*.syso
+
+/cockpit-layout.json
+
+/material-notes.json
+
+/engineering-pins.json

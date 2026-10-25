@@ -18,8 +18,28 @@ import (
 type shipModule struct {
 	Slot, Item                         string
 	On                                 bool
+	OnKnown                            bool `json:"-"`
 	Health                             *float64
 	Priority, AmmoInClip, AmmoInHopper *int
+}
+
+func (m *shipModule) UnmarshalJSON(data []byte) error {
+	type plain shipModule
+	var decoded plain
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(data, &fields); err != nil {
+		return err
+	}
+	for key, value := range fields {
+		if strings.EqualFold(key, "On") && string(value) != "null" {
+			decoded.OnKnown = true
+		}
+	}
+	*m = shipModule(decoded)
+	return nil
 }
 
 type shipOverview struct {
@@ -28,6 +48,9 @@ type shipOverview struct {
 	Hull, Tank, MaxJump, Rebuy *float64
 	CargoCapacity              *int
 	Modules                    []shipModule
+	ModulesPower               []modulePowerInfo
+	PowerInfoAt                time.Time
+	PowerInfoError             string
 	Updated, HullAt, ModulesAt time.Time
 }
 
@@ -90,6 +113,7 @@ func (d companionData) clone() companionData {
 		c.MaterialCategories[id] = known
 	}
 	c.Ship.Modules = append([]shipModule(nil), d.Ship.Modules...)
+	c.Ship.ModulesPower = append([]modulePowerInfo(nil), d.Ship.ModulesPower...)
 	c.Nav.Position = append([]float64(nil), d.Nav.Position...)
 	c.Nav.Route = append([]routePoint(nil), d.Nav.Route...)
 	// Event-owned coordinate slices and optional scalar pointers are immutable.
@@ -213,6 +237,7 @@ func (d *companionData) apply(e journalEvent) {
 	if e.Event == "LoadGame" {
 		d.identity(e.FID, e.Commander)
 		d.GameMode, d.SessionStart = e.GameMode, e.Timestamp
+		d.Ship.ModulesPower, d.Ship.PowerInfoAt, d.Ship.PowerInfoError = nil, time.Time{}, ""
 	}
 	if e.Timestamp.After(d.LastEvent) {
 		d.LastEvent = e.Timestamp
@@ -245,6 +270,7 @@ func (d *companionData) apply(e journalEvent) {
 			d.Ship.MaxJump, d.Ship.Rebuy, d.Ship.CargoCapacity = e.MaxJumpRange, e.Rebuy, e.CargoCapacity
 			d.Ship.Modules = append([]shipModule(nil), e.Modules...)
 			d.Ship.ModulesAt = e.Timestamp
+			d.Ship.ModulesPower, d.Ship.PowerInfoAt, d.Ship.PowerInfoError = nil, time.Time{}, ""
 		}
 	case "HullDamage":
 		if e.PlayerShip != nil && *e.PlayerShip && !e.Fighter && e.Health != nil {
@@ -374,6 +400,8 @@ type journalReader struct {
 	cursor    journalCursor
 	started   bool
 	routeInfo os.FileInfo
+	powerInfo os.FileInfo
+	powerFit  string
 }
 
 type companionMsg struct {
@@ -513,7 +541,13 @@ func (r *journalReader) update() error {
 			r.cursor = cursor
 		}
 	}
-	return r.readRoute()
+	routeErr := r.readRoute()
+	if err := r.readModulePower(); err != nil {
+		r.data.Ship.PowerInfoError = safeText(err.Error())
+	} else {
+		r.data.Ship.PowerInfoError = ""
+	}
+	return routeErr
 }
 
 func journalOrder(path string) string {

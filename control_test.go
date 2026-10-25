@@ -20,7 +20,7 @@ func (s *fakeSink) Pulse(ctx context.Context, key string, target gameTarget) err
 	return s.err
 }
 func testTarget() gameTarget {
-	return gameTarget{Window: 10, PID: 20, Path: filepath.Join(os.TempDir(), "EliteDangerous64.exe")}
+	return gameTarget{Window: 10, PID: 20, Created: 1, Path: filepath.Join(os.TempDir(), "EliteDangerous64.exe")}
 }
 func testConfig() controlConfig {
 	c := controlConfig{Version: 1, Preset: "EliteAuxPanel", Keys: make(map[string]string)}

@@ -60,7 +60,7 @@ func TestBootSkipNavigationQuitAndBackendStateRemainResponsive(t *testing.T) {
 	}
 	m := newCockpit(cockpitOptions{mode: "control", boot: true}, testNow)
 	m = updateCockpit(t, m, pageStepMsg(1))
-	if m.bootActive || m.page != pageDiagnostics {
+	if m.bootActive || m.page != pageShip {
 		t.Fatal("global page navigation did not bypass boot")
 	}
 	m = newCockpit(cockpitOptions{mode: "control", boot: true}, testNow)

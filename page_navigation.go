@@ -7,6 +7,27 @@ const (
 	nextPageHotkey     = 4
 )
 
+type pageDefinition struct {
+	ID             int
+	Name, Shortcut string
+}
+
+// One manifest controls terminal tabs, cycling and the desktop navigation.
+var flightPages = []pageDefinition{
+	{pageCockpit, "Cockpit", ""}, {pageShip, "Ship", "F6"}, {pageNavigation, "Navigation", "F7"},
+	{pageMissions, "Missions", "F8"}, {pageHardpoints, "Hardpoints", "F10"}, {pageEngineering, "Engineering", "F9"},
+	{pageSettings, "Settings", "F5"}, {pageDiagnostics, "Diagnostics", ""}, {pageHelp, "Help", "F1"},
+}
+
+func pagePosition(page int) int {
+	for i, item := range flightPages {
+		if item.ID == page {
+			return i
+		}
+	}
+	return 0
+}
+
 func numpadPageStep(key tea.Key) int {
 	code := numpadCode(key)
 	if key.Mod == 0 {
@@ -21,9 +42,11 @@ func numpadPageStep(key tea.Key) int {
 }
 
 func (m *cockpitModel) stepPage(delta int) {
+	m.closeOutfitting()
 	m.leaveSettings()
 	m.goalEditing, m.materialSearching = false, false
-	m.page = ((m.page+delta)%pageCount + pageCount) % pageCount
+	m.stationSearchActive = false
+	m.page = flightPages[((pagePosition(m.page)+delta)%len(flightPages)+len(flightPages))%len(flightPages)].ID
 	m.scroll = 0
 }
 

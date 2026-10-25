@@ -1,0 +1,6 @@
+# Co-pit icon
+
+Generated with the built-in image generation tool. Transparent PNG concept for the Wails desktop app.
+
+Prompt:
+Use case: logo-brand. Asset type: square Windows desktop app icon for a Wails Elite Dangerous companion named Co-pit. Primary request: one polished original sci-fi winged eagle medal emblem, evolving a terminal eagle-medal identity into a graphical app icon. Subject: bold geometric eagle head in profile centered above a compact downward shield/cockpit canopy, with symmetrical angular spread wings, three broad feather segments per side; subtle negative-space cockpit/navigation chevron at the heart. Style: precision vector-like hard-edged insignia, restrained dark gunmetal inset surfaces, luminous warm amber-orange edging inspired by a spacecraft terminal, a few engraved scan-line details only on broad surfaces. Composition: single centered compact emblem occupying 82 percent of a square canvas, strong thick silhouette readable at 32 pixels, ample transparent margin. Genuine transparent background outside the emblem. No square background tile. Original identity rather than a replica of Elite Dangerous's official logo. No text or letters, no wordmark, no watermark, no photo, no extra symbols or stars, no scene, no excessive thin detail, no diffuse glow that obscures edges.

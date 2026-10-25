@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en" data-theme="command-deck" data-layout="auto">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' ws:; object-src 'none'; base-uri 'none'"
+    />
+    <title>Co-pit</title>
+    <link rel="icon" href="icon.png" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="screen.css" />
+    <link rel="stylesheet" href="controls.css" />
+    <link rel="stylesheet" href="pages.css" />
+    <link rel="stylesheet" href="navigation.css" />
+    <link rel="stylesheet" href="health.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="titlebar">
+        <div class="brand">
+          <img src="icon.png" alt="" /><strong>CO-PIT</strong
+          ><span class="brand-caption">AUXILIARY FLIGHT SYSTEMS</span>
+        </div>
+        <div class="window-actions">
+          <button
+            id="fullscreen"
+            title="Toggle borderless fullscreen (F11)"
+            aria-label="Toggle fullscreen"
+          >
+            ⛶</button
+          ><button id="minimise" title="Minimise" aria-label="Minimise">
+            −</button
+          ><button id="close" title="Close Co-pit" aria-label="Close Co-pit">
+            ×
+          </button>
+        </div>
+      </header>
+      <div class="connection" id="connection" role="status">
+        <span class="status-dot"></span
+        ><strong id="status">CONNECTING TO BACKEND</strong
+        ><span id="status-detail">Starting systems</span
+        ><button
+          id="disarm"
+          class="stop-button"
+          title="Disarm and cancel automatic focus resume"
+        >
+          STOP
+        </button>
+        <div id="shield-offline-banner" role="alert" hidden>SHIELDS OFFLINE</div>
+      </div>
+      <aside class="sidebar">
+        <div class="side-label">FLIGHT CONSOLE</div>
+        <nav id="navigation" aria-label="Pages"></nav>
+        <div class="side-footer">
+          <span>LOCAL TELEMETRY</span><span>CO-PIT // 01</span>
+        </div>
+      </aside>
+      <main id="main" tabindex="-1">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow" id="eyebrow">COMMAND DECK</div>
+            <h1 id="page-title">Cockpit</h1>
+          </div>
+          <div class="heading-tools">
+            <span id="orientation">LANDSCAPE</span
+            ><button id="settings-shortcut" title="Display settings">
+              Settings
+            </button>
+          </div>
+        </div>
+        <div class="notice" id="error" role="alert" hidden></div>
+        <section id="cockpit">
+          <article id="ship-health" class="panel" aria-label="Ship health" data-display="ship">
+            <div class="health-radar">
+              <div class="health-reading health-reading-shield"><span>SHIELDS</span><strong data-health-value="shield">Unknown</strong></div>
+              <div class="health-scope"><div class="health-oval" data-health-meter="shield" role="img"><div class="health-fill"></div></div><div class="health-hull" data-health-meter="hull" role="img"><div class="health-fill"></div><i class="health-keel"></i><i class="health-seam"></i><i class="health-seam right"></i></div></div>
+              <div class="health-reading health-reading-hull"><span>HULL</span><strong data-health-value="hull">Unknown</strong></div>
+            </div>
+            <div class="health-insets"><div class="health-inset" data-health-meter="shield" role="img"><div class="health-fill"></div><span>SHIELDS</span><strong data-health-value="shield">Unknown</strong></div><div class="health-inset" data-health-meter="hull" role="img"><div class="health-fill"></div><span>HULL</span><strong data-health-value="hull">Unknown</strong></div></div>
+            <p id="health-source"></p>
+          </article>
+          <div class="vessel-strip panel">
+            <div>
+              <strong id="commander">Waiting for commander</strong
+              ><span id="ship">Unreported ship</span>
+            </div>
+            <div>
+              <span id="system">NO SYSTEM</span
+              ><span id="context">Searching for Elite Dangerous</span>
+            </div>
+          </div>
+          <article class="cockpit-control-panel panel" aria-labelledby="flight-controls-title">
+            <div class="control-panel-heading"><h2 id="flight-controls-title">Flight controls</h2><div class="control-panel-tools"><button type="button" id="customise-controls">Edit controls</button><button type="button" id="open-control-picker" class="control-plus" aria-label="Add ship controls" title="Add ship controls">+</button></div></div>
+            <div class="control-tech-strip" aria-hidden="true"><span>AUX / FLIGHT SYSTEMS</span><span class="control-hatching"></span></div>
+            <div id="controls">
+              <section class="control-bank" aria-labelledby="toggle-controls-title">
+                <div class="control-bank-heading"><h3 id="toggle-controls-title">Toggles</h3><span id="toggle-control-count"></span></div>
+                <div id="toggle-controls" class="control-grid"></div>
+                <p id="toggle-controls-empty" class="muted" hidden>No toggles on this layout. Use Edit controls to add one.</p>
+              </section>
+              <section class="control-bank" aria-labelledby="trigger-controls-title">
+                <div class="control-bank-heading"><h3 id="trigger-controls-title">Activatable buttons</h3><span id="trigger-control-count"></span></div>
+                <div id="trigger-controls" class="control-grid"></div>
+                <p id="trigger-controls-empty" class="muted" hidden>No triggers on this layout. Use Edit controls to add one.</p>
+              </section>
+            </div>
+            <div class="control-panel-footer"><p>UNKNOWN = no reported state · ACTION = momentary control</p><span class="control-barcode" aria-hidden="true"></span></div>
+          </article>
+          <p class="control-hint" id="control-hint">
+            Arm once in Elite with Ctrl+Alt+F9. Focus changes pause controls;
+            Stop cancels arming.
+          </p>
+          <div class="instrument-strip panel">
+            <span id="fuel">Fuel unavailable</span
+            ><span id="pips">Power unavailable</span>
+          </div>
+          <div class="flight-note">
+            <p id="warning">Waiting for telemetry</p>
+            <p id="action" class="muted">Ready</p>
+          </div>
+          <article class="cockpit-route panel" aria-label="Plotted destination"><div class="cockpit-route-heading"><h2>DESTINATION</h2><button id="cockpit-open-navigation" type="button">Navigation →</button></div><strong id="cockpit-destination">No plotted destination reported</strong><dl><div><dt>Next jump</dt><dd id="cockpit-route-next">Not reported</dd></div><div><dt>Jumps remaining</dt><dd id="cockpit-route-remaining">Not reported</dd></div><div><dt>Distance</dt><dd id="cockpit-route-distance">Not reported</dd></div></dl><p id="cockpit-route-source" class="muted"></p></article>
+        </section>
+        <div id="outfitting-launch" class="outfitting-launch" hidden>
+          <button id="outfitting-view-open" type="button">
+            Browse station outfitting</button
+          ><span class="muted"
+            >Choose a system and station · view modules here</span
+          >
+        </div>
+        <section
+          id="outfitting-view"
+          hidden
+          aria-label="Station outfitting viewer"
+        >
+          <div class="outfitting-topbar">
+            <button id="outfitting-back" type="button">← Navigation</button
+            ><span id="outfitting-source" class="muted"
+              >EDSM · last-reported availability</span
+            ><button id="outfitting-browser" type="button">
+              Browser search ↗
+            </button>
+          </div>
+          <form
+            id="outfitting-system-form"
+            class="outfitting-system-form panel"
+          >
+            <div>
+              <label for="outfitting-system">Star system</label
+              ><input
+                id="outfitting-system"
+                type="text"
+                maxlength="128"
+                placeholder="e.g. Sol"
+                autocomplete="off"
+                required
+              />
+            </div>
+            <button id="outfitting-current" type="button">
+              Use current system</button
+            ><button id="outfitting-load" type="submit">Load stations</button>
+          </form>
+          <div class="outfitting-status">
+            <p id="outfitting-message" role="status"></p>
+            <button id="outfitting-cancel" type="button" hidden>
+              Cancel search</button
+            ><button id="outfitting-refresh" type="button">Refresh</button>
+          </div>
+          <div id="outfitting-error" class="notice" role="alert" hidden></div>
+          <div class="outfitting-layout">
+            <article class="panel outfit-station-panel">
+              <h2 id="outfit-station-title">Stations</h2>
+              <label for="outfit-station-filter">Filter stations</label
+              ><input
+                id="outfit-station-filter"
+                type="search"
+                maxlength="128"
+                placeholder="Station name or type"
+              />
+              <div
+                id="outfit-stations"
+                role="list"
+                aria-label="Stations"
+              ></div>
+              <p id="outfit-stations-empty" class="muted">
+                Enter a system and load its stations.
+              </p>
+            </article>
+            <article class="panel outfit-module-panel">
+              <div class="outfit-station-heading">
+                <div>
+                  <h2 id="outfit-station-name">Select a station</h2>
+                  <p id="outfit-station-description" class="muted"></p>
+                </div>
+              </div>
+              <p id="outfit-update-age" class="outfit-update-age"></p>
+              <div class="outfit-filters">
+                <div>
+                  <label for="outfit-module-filter">Search modules</label
+                  ><input
+                    id="outfit-module-filter"
+                    type="search"
+                    maxlength="128"
+                    placeholder="e.g. frame shift drive or 5A"
+                  />
+                </div>
+                <div>
+                  <label for="outfit-category">Type</label
+                  ><select id="outfit-category"></select>
+                </div>
+                <div>
+                  <label for="outfit-class">Class</label
+                  ><select id="outfit-class">
+                    <option value="">All</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="outfit-rating">Rating</label
+                  ><select id="outfit-rating">
+                    <option value="">All</option>
+                  </select>
+                </div>
+              </div>
+              <p id="outfit-module-count" class="muted"></p>
+              <div class="outfit-table-scroll">
+                <table class="outfitting-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Module</th>
+                      <th scope="col">Class</th>
+                      <th scope="col">Rating</th>
+                      <th scope="col" class="outfit-type-column">Type</th>
+                    </tr>
+                  </thead>
+                  <tbody id="outfit-modules"></tbody>
+                </table>
+                <p id="outfit-modules-empty" class="muted">
+                  Choose a station to load its reported outfitting.
+                </p>
+              </div>
+              <p class="muted outfit-data-note">
+                Community reports can be old. This is reported availability, not
+                guaranteed current stock. EDSM does not provide prices or stock
+                quantities here.
+              </p>
+              <p id="outfit-retrieved" class="muted"></p>
+            </article>
+          </div>
+        </section>
+        <section
+          id="station-search-tools"
+          class="station-search-tools panel"
+          hidden
+          aria-label="Station search"
+        >
+          <div>
+            <label for="station-search-kind">Station search</label
+            ><select id="station-search-kind"></select>
+          </div>
+          <button id="station-search-open" type="button">Open Inara ↗</button>
+          <p id="station-search-description" class="muted"></p>
+          <p id="station-search-reference" class="muted"></p>
+          <p class="muted">
+            Search and filter in your browser. Check listing update times: stock
+            and prices are community-reported. Exact live mission-board offers
+            are not available here.
+          </p>
+        </section>
+        <section id="graphical-page" hidden>
+          <p id="graphical-page-source"></p>
+          <p id="graphical-page-message" class="muted" role="status" hidden></p>
+          <div id="graphical-page-panels" class="graphical-page-panels"></div>
+          <article id="ship-modules-panel" class="panel" aria-labelledby="ship-module-title" hidden>
+            <div class="ship-module-screen-heading">
+              <h2 id="ship-module-title">Installed modules</h2>
+              <span id="ship-module-total"></span>
+            </div>
+            <p class="ship-module-report">
+              <span id="ship-modules-reported"></span>
+              <span>Journal snapshot · integrity is not a live damage feed.</span>
+              <span>Key systems are marked even when healthy. Red means reported damage to a key system.</span>
+            </p>
+            <p id="ship-power-report"></p>
+            <p id="ship-module-summary" role="status"></p>
+            <ul id="ship-module-list" class="ship-module-list" aria-label="Installed module integrity"></ul>
+          </article>
+        </section>
+        <section id="engineering" hidden>
+          <div class="engineering-toolbar">
+            <div>
+              <label for="material-search">Search materials</label
+              ><input
+                id="material-search"
+                type="search"
+                maxlength="80"
+                placeholder="Type a material name…"
+                autocomplete="off"
+              />
+            </div>
+            <div>
+              <label for="material-view">Show</label
+              ><select id="material-view">
+                <option value="all">All materials</option>
+                <option value="pinned">Pinned materials</option>
+              </select>
+            </div>
+          </div>
+          <p id="material-pins-error" class="notice" role="alert" hidden></p>
+          <div class="engineering-grid" data-details="false">
+            <article class="panel material-browser">
+              <div class="material-list-heading">
+                <span>Pin</span><span>Material</span><span>Owned / target</span><span>Comment</span>
+              </div>
+              <div
+                id="material-list"
+                role="listbox"
+                aria-label="Materials"
+                tabindex="0"
+              ></div>
+              <p id="material-empty" class="muted" hidden>
+                No matching materials. Try another search or show all materials.
+              </p>
+            </article>
+            <article id="material-details" class="panel target-panel" aria-labelledby="material-name" hidden>
+              <div class="material-details-heading"><div class="eyebrow">MATERIAL DETAILS</div><button id="close-material-details" type="button" aria-label="Close material details">✕</button></div>
+              <h2 id="material-name">Select a material</h2>
+              <p id="material-category" class="muted"></p>
+              <button id="pin-material" type="button" aria-pressed="false">Pin material</button>
+              <div class="target-progress">
+                <span>Owned <strong id="material-owned">?</strong></span
+                ><span
+                  >Still needed <strong id="material-needed">—</strong></span
+                >
+              </div>
+              <form id="target-form">
+                <label for="material-target">Target quantity</label
+                ><input
+                  id="material-target"
+                  type="number"
+                  min="1"
+                  max="999999"
+                  step="1"
+                  placeholder="e.g. 20"
+                  required
+                />
+                <div class="target-actions">
+                  <button id="save-target" type="submit">Save target</button
+                  ><button id="remove-target" type="button">
+                    Remove target
+                  </button>
+                </div>
+              </form>
+              <p id="material-message" class="muted" role="status"></p>
+              <p class="muted target-explanation">
+                Choose a material, enter how many you want, then save. ? means
+                the game has not reported your inventory.
+              </p>
+              <section class="material-comments" aria-labelledby="material-note-title">
+                <h3 id="material-note-title">Your comments</h3>
+                <p id="material-note-hint" class="muted"></p>
+                <label for="material-note">Material notes</label>
+                <textarea id="material-note" rows="5" maxlength="2000" placeholder="Record blueprints, uses, collection spots or reminders…" aria-describedby="material-note-hint material-note-status" spellcheck="true"></textarea>
+                <div class="target-actions">
+                  <button id="save-material-note" type="button">Save comment</button>
+                  <button id="clear-material-note" type="button">Clear comment</button>
+                </div>
+                <p id="material-note-status" class="muted" role="status"></p>
+                <p id="material-note-error" class="notice" role="alert" hidden></p>
+              </section>
+            </article>
+          </div>
+        </section>
+        <section id="settings" hidden>
+          <div class="settings-grid">
+            <article class="panel">
+              <div class="eyebrow">WINDOW & DISPLAY</div>
+              <h2>Your second screen</h2>
+              <p class="muted">
+                Automatic layout follows the window shape, including a rotated
+                monitor.
+              </p>
+              <label for="layout">Panel layout</label
+              ><select id="layout">
+                <option value="auto">Automatic · follow window shape</option>
+                <option value="portrait">Portrait · stacked panels</option>
+                <option value="landscape">Landscape · wide panels</option>
+              </select>
+              <label for="control-columns">Buttons per row</label>
+              <select id="control-columns" aria-describedby="control-columns-help">
+                <option value="0">Automatic</option>
+                <option value="1">1 button</option>
+                <option value="2">2 buttons</option>
+                <option value="3">3 buttons</option>
+                <option value="4">4 buttons</option>
+                <option value="5">5 buttons</option>
+                <option value="6">6 buttons</option>
+                <option value="7">7 buttons</option>
+                <option value="8">8 buttons</option>
+                <option value="9">9 buttons</option>
+                <option value="10">10 buttons</option>
+              </select>
+              <p id="control-columns-help" class="muted">Maximum buttons across each row. Narrow windows fit fewer columns; buttons stay small squares.</p>
+              <div class="setting-row">
+                <div>
+                  <strong>Borderless fullscreen</strong>
+                  <p class="muted">
+                    Fill the current monitor. Press F11 to toggle; Esc returns
+                    to a window. This applies only until you close Co-pit;
+                    every launch opens windowed.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  id="fullscreen-setting"
+                  aria-label="Borderless fullscreen"
+                />
+              </div>
+              <button id="portrait-window">Use tall window · 720 × 1100</button>
+              <p class="muted">
+                Move Co-pit onto your preferred monitor before entering
+                fullscreen.
+              </p>
+            </article>
+            <article class="panel">
+              <div class="eyebrow">APPEARANCE</div>
+              <h2>Console style</h2>
+              <label for="theme">Theme</label
+              ><select id="theme">
+                <option value="command-deck">Command Deck · amber</option>
+                <option value="flight-console">Flight Console · cyan</option>
+                <option value="retro-ops">Retro Operations · green</option>
+              </select>
+              <div class="setting-row">
+                <div>
+                  <strong>Scan lines</strong>
+                  <p class="muted">
+                    Subtle CRT overlay; controls stay readable.
+                  </p>
+                </div>
+                <input type="checkbox" id="scanlines" aria-label="Scan lines" />
+              </div>
+              <label for="health-display">Ship health display</label><select id="health-display"><option value="ship">Ship shield</option><option value="bars">Inset labels</option></select><p class="muted">Live shields report up/down; percentage is unavailable. Hull uses the latest journal report.</p>
+              <div class="scanline-setting-value"><label for="scanline-spacing">Scan-line spacing</label><span id="scanline-spacing-value">12 px</span></div>
+              <input id="scanline-spacing" type="range" min="4" max="24" step="2" value="12" aria-describedby="scanline-spacing-help">
+              <p class="muted" id="scanline-spacing-help">Wider lines are easier to see on high-resolution displays.</p>
+              <div class="theme-preview">
+                <span>SYS ONLINE</span><span>AWAITING INPUT</span
+                ><span>STANDBY</span>
+              </div>
+            </article>
+            <article id="control-layout-editor" class="panel control-layout-editor" aria-labelledby="control-layout-title">
+              <div class="eyebrow">COCKPIT CONTROLS</div>
+              <div class="control-layout-heading"><h2 id="control-layout-title">Your ship controls</h2><button type="button" id="reset-cockpit-layout">Remove optional utilities</button></div>
+              <p class="muted">Add, remove, reassign or reorder controls. Actions stay in their Toggle or Activatable button group. Each tile shows its action’s existing numpad key; layout edits do not change game bindings.</p>
+              <div class="setting-row"><div><strong>Automatically add ship utilities</strong><p class="muted">Add every supported utility found in the reported ship loadout. Controls from previous ships stay on the panel.</p></div><input type="checkbox" id="auto-ship-controls" aria-label="Automatically add ship utilities"></div>
+              <div class="control-layout-add"><button type="button" id="add-control-action-picker">+ Add ship controls</button></div>
+              <p class="muted">Heat sink and chaff availability uses the last reported loadout. Missing loadout data stays unknown.</p>
+              <div class="control-layout-lists">
+                <section aria-labelledby="toggle-layout-title"><h3 id="toggle-layout-title">Toggles</h3><div id="toggle-layout-list"></div><p id="toggle-layout-empty" class="muted" hidden>No toggles added.</p></section>
+                <section aria-labelledby="trigger-layout-title"><h3 id="trigger-layout-title">Activatable buttons</h3><div id="trigger-layout-list"></div><p id="trigger-layout-empty" class="muted" hidden>No triggers added.</p></section>
+              </div>
+              <p id="control-layout-message" class="muted" role="status">Permanent controls stay on every ship. Optional utility changes save automatically; numpad bindings stay the same.</p>
+            </article>
+            <article class="panel">
+              <div class="eyebrow">TRAINING</div>
+              <h2>Mock mode</h2>
+              <div class="setting-row">
+                <div>
+                  <strong>Enable simulator</strong>
+                  <p class="muted">
+                    Stops real controls and uses sample telemetry. Every normal
+                    launch starts in real mode, disarmed.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  id="mock"
+                  aria-label="Enable simulator"
+                />
+              </div>
+              <p id="settings-message" class="muted" role="status">
+                Display preferences save automatically.
+              </p>
+            </article>
+          </div>
+        </section>
+      </main>
+      <footer class="footer">
+        <span id="mode">REAL GAME · DISARMED</span
+        ><span
+          >F11 FULLSCREEN
+          <span class="footer-extra"> · CTRL+TAB / NUM +/− PAGES</span></span
+        ><span id="clock"></span>
+      </footer>
+    </div>
+    <dialog id="ship-control-picker" class="ship-control-picker" aria-labelledby="control-picker-title">
+      <div class="control-picker-heading"><h2 id="control-picker-title">Add ship controls</h2><button type="button" id="control-picker-stop" class="stop-button">STOP</button></div>
+      <p id="control-picker-ship" class="muted"></p>
+      <p id="control-picker-loadout" class="muted"></p>
+      <p class="muted">Only supported actions available on the reported ship are listed. Existing controls stay on the cockpit when ships change.</p>
+      <p id="control-picker-error" class="notice" role="alert" hidden></p>
+      <div class="control-picker-lists">
+        <section><h3>Toggles</h3><div id="toggle-picker-list"></div><p id="toggle-picker-empty" class="muted" hidden>Waiting for a reported ship.</p></section>
+        <section><h3>Activatable buttons</h3><div id="trigger-picker-list"></div><p id="trigger-picker-empty" class="muted" hidden>No supported triggers confirmed for this loadout.</p></section>
+      </div>
+      <div class="control-picker-actions"><button type="button" id="close-control-picker">Cancel</button><button type="button" id="confirm-add-controls" disabled>Add selected</button></div>
+    </dialog>
+    <script src="outfitting.js"></script>
+    <script src="ship.js"></script>
+    <script src="control-icons.js"></script>
+    <script src="controls.js"></script>
+    <script src="control-layout.js"></script>
+    <script src="ship-control-picker.js"></script>
+    <script src="pages.js"></script>
+    <script src="material-list.js"></script>
+    <script src="material-notes.js"></script>
+    <script src="health.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
