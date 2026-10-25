@@ -50,6 +50,9 @@ func shipModuleRows(modules []shipModule) []shipModuleView {
 		}
 		if row.Name == "" {
 			row.Name = row.Item
+			if strings.HasPrefix(strings.ToLower(strings.TrimPrefix(module.Item, "$")), "hpt_") {
+				row.Name = hardpointLabel(module)
+			}
 			if row.Name == "" {
 				row.Name = reportedText(row.Slot)
 			}

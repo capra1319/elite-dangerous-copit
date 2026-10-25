@@ -1,67 +1,55 @@
-.shell { position: relative; isolation: isolate; }
-body[data-shield-offline="true"] .shell::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 50; box-shadow: inset 0 0 45px 12px #ff3344; animation: shield-warning 1.8s ease-in-out infinite alternate; }
-@keyframes shield-warning { from { opacity: .25; } to { opacity: .85; } }
-#shield-offline-banner { flex-basis: 100%; order: 1; color: #ffb5b9; background: #54141d; border: 1px solid #d55362; padding: 8px 14px; text-align: center; font: 800 15px var(--terminal-font); letter-spacing: .15em; }
-#ship-health { margin-bottom: 16px; padding: 16px 22px 12px; }
-.health-radar { display: grid; grid-template-columns: minmax(0,1fr) minmax(170px,270px) minmax(0,1fr); align-items: center; gap: 16px; }
-.health-reading { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-.health-reading:last-child { text-align: right; }
-.health-reading span { color: var(--muted); font: 12px var(--terminal-font); letter-spacing: .12em; }
-.health-reading strong { font: 700 clamp(18px,2vw,28px) var(--terminal-font); }
-.health-reading-shield strong { color: #77caff; }
-.health-reading-hull strong { color: #ffb258; }
-.health-scope { position: relative; height: 132px; display: grid; place-items: center; }
-.health-oval { position: absolute; inset: 5% 0; overflow: hidden; border: 1px solid #5ba4d9; border-radius: 50%; background: #122637; box-shadow: 0 0 16px #3595d526; }
-.health-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: var(--health-level); background: linear-gradient(90deg,#267cac99,#68c4ffb3,#267cac99); }
-.health-hull { position: relative; width: 42%; aspect-ratio: 1.25; overflow: hidden; clip-path: polygon(50% 0,100% 88%,65% 76%,50% 100%,35% 76%,0 88%); background: #46341f; filter: drop-shadow(0 0 5px #ffab52); }
-.health-hull .health-fill { background: linear-gradient(90deg,#cd7e2e,#ffd58c,#cd7e2e); }
-.health-oval::after,.health-hull::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(0deg,transparent 0 4px,#08101a99 4px 6px); }
-.health-keel,.health-seam { position: absolute; z-index: 2; width: 1px; background: #30200d; top: 0; bottom: 0; left: 50%; }
-.health-seam { top: 25%; height: 110%; transform-origin: top; transform: rotate(45deg); }
-.health-seam.right { transform: rotate(-45deg); }
-[data-health-meter][data-unknown="true"] { background: repeating-linear-gradient(135deg,#21303b 0 7px,#14212b 7px 14px); }
-.health-insets { display: none; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
-.health-inset { position: relative; overflow: hidden; padding: 15px; border: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.health-inset .health-fill { height: 100%; width: var(--health-level); opacity: .45; }
-.health-inset[data-health-meter="hull"] .health-fill { background: #c98232; }
-.health-inset span,.health-inset strong { position: relative; z-index: 1; font-family: var(--terminal-font); }
-.health-inset strong { font-size: 22px; }
-#ship-health[data-display="bars"] .health-radar { display: none; }
-#ship-health[data-display="bars"] .health-insets { display: grid; }
-#health-source { margin-top: 10px; color: var(--muted); font: 11px/1.5 var(--terminal-font); }
-.cockpit-route { margin-top: 18px; }
-.cockpit-route-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.cockpit-route h2 { font-size: 13px; color: var(--muted); letter-spacing: .08em; }
-#cockpit-destination { display: block; margin: 12px 0; font-size: 22px; overflow-wrap: anywhere; }
-.cockpit-route dl { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; margin: 0 0 14px; }
-.cockpit-route dt { color: var(--muted); font-size: 12px; }
-.cockpit-route dd { margin: 6px 0 0; overflow-wrap: anywhere; }
-#cockpit-route-source { font-size: 11px; }
-main[data-page="4"] #graphical-page { display: flex; align-items: stretch; }
-main[data-page="4"] .graphical-page-panels { flex: 0; }
-main[data-page="4"] .graphical-fields { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 0 24px; }
-main[data-page="4"] .graphical-fields > div { grid-template-columns: minmax(0,1fr); gap: 5px; }
-#ship-module-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px; }
-#ship-module-list .ship-module { margin: 0; grid-template-columns: minmax(0,1fr); gap: 12px; }
-#ship-module-list .ship-module-integrity { flex-direction: row; align-items: center; text-align: left; }
-#ship-module-list .ship-module-integrity progress { flex: 1; }
-.module-power-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; margin: 12px 0 0; }
-.module-power-fields dt { color: var(--muted); font-size: 11px; }
-.module-power-fields dd { margin: 4px 0 0; font: 600 13px var(--terminal-font); }
-#ship-power-report { margin-top: 12px; font-size: 12px; line-height: 1.6; color: var(--muted); }
-@media(max-width:600px) { #ship-module-list { grid-template-columns: minmax(0,1fr); } main[data-page="4"] .graphical-fields { grid-template-columns: repeat(2,minmax(0,1fr)); } .health-radar { grid-template-columns: minmax(0,1fr) 130px minmax(0,1fr); gap: 8px; } .health-scope { height: 95px; } .health-reading strong { font-size: 15px; } .health-insets { grid-template-columns: minmax(0,1fr); } .cockpit-route dl { grid-template-columns: minmax(0,1fr); gap: 10px; } }
-@media(prefers-reduced-motion:reduce) { body[data-shield-offline="true"] .shell::after { animation: none; opacity: .6; } }
-
-/* Compact module cards keep names prominent and readings on short rows. */
-#ship-module-list { gap: 10px; }
-#ship-module-list .ship-module { padding: 11px 12px; gap: 8px; }
-#ship-module-list .ship-module-heading { gap: 3px 10px; }
-#ship-module-list .ship-module h3 { font-size: 20px; font-weight: 700; line-height: 1.2; }
-#ship-module-list .ship-module-label { font-size: 10px; line-height: 1.3; }
-#ship-module-list .ship-module-detail { margin-top: 3px; line-height: 1.3; }
-#ship-module-list .module-power-fields { gap: 5px 14px; margin-top: 9px; }
-#ship-module-list .module-power-fields > div { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; min-width: 0; }
-#ship-module-list .module-power-fields dt { line-height: 1.3; }
-#ship-module-list .module-power-fields dd { margin: 0; font-size: 12px; line-height: 1.3; flex-shrink: 0; }
-#ship-module-list .ship-module-consequence { margin-top: 6px; line-height: 1.35; }
-#ship-module-list .ship-module-integrity { gap: 10px; }
+body[data-shield-offline="true"] .shell::after { content:""; position:absolute; inset:0; pointer-events:none; z-index:50; box-shadow:inset 0 0 2.5rem .5rem #ff3344; animation:shield-warning 1.8s ease-in-out infinite alternate; }
+@keyframes shield-warning { from{opacity:.25} to{opacity:.8} }
+#shield-offline-banner { flex-basis:100%; order:1; color:#ffc3c7; background:#54141d; border:1px solid #dc7c89; padding:.5rem 1rem; text-align:center; font-weight:800; letter-spacing:.1em; }
+#cockpit { display:flex; flex-direction:column; gap:.75rem; }
+#ship-health { padding:.5rem 1rem; }
+.health-radar { display:grid; grid-template-columns:minmax(0,12rem) minmax(8rem,16rem) minmax(0,12rem); align-items:center; justify-content:center; gap:1rem; }
+.health-reading { display:flex; flex-direction:column; gap:.25rem; min-width:0; }
+.health-reading:last-child { text-align:right; }
+.health-reading span { color:var(--muted); font-size:var(--text-small); font-weight:600; }
+.health-reading strong { font:700 1.875rem/1.2 var(--terminal-font); }
+.health-reading-shield strong { color:#9edbff; }
+.health-reading-hull strong { color:#ffd18c; }
+.health-scope { position:relative; height:5.5rem; display:grid; place-items:center; }
+.health-oval { position:absolute; inset:5% 0; overflow:hidden; border:1px solid #71bae8; border-radius:50%; background:#142f43; }
+.health-fill { position:absolute; bottom:0; left:0; width:100%; height:var(--health-level); background:linear-gradient(90deg,#267cac99,#68c4ffb3,#267cac99); }
+.health-hull { position:relative; width:42%; aspect-ratio:1.25; overflow:hidden; clip-path:polygon(50% 0,100% 88%,65% 76%,50% 100%,35% 76%,0 88%); background:#46341f; }
+.health-hull .health-fill { background:linear-gradient(90deg,#cd7e2e,#ffd58c,#cd7e2e); }
+.health-oval::after,.health-hull::after { content:""; position:absolute; inset:0; pointer-events:none; background:repeating-linear-gradient(0deg,transparent 0 4px,#08101a99 4px 6px); }
+.health-keel,.health-seam { position:absolute; z-index:2; width:1px; background:#30200d; top:0; bottom:0; left:50%; }
+.health-seam { top:25%; height:110%; transform-origin:top; transform:rotate(45deg); }
+.health-seam.right { transform:rotate(-45deg); }
+[data-health-meter][data-unknown="true"] { background:repeating-linear-gradient(135deg,#21303b 0 7px,#14212b 7px 14px); }
+.health-insets { display:none; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; max-width:50rem; margin:auto; }
+.health-inset { position:relative; overflow:hidden; padding:.75rem; border:1px solid var(--line); border-radius:.25rem; display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+.health-inset .health-fill { height:100%; width:var(--health-level); opacity:.45; }
+.health-inset[data-health-meter="hull"] .health-fill { background:#c98232; }
+.health-inset span,.health-inset strong { position:relative; z-index:1; }
+.health-inset strong { font:700 1.5rem var(--terminal-font); }
+#ship-health[data-display="bars"] .health-radar { display:none; }
+#ship-health[data-display="bars"] .health-insets { display:grid; }
+#health-source { margin-top:.25rem; color:var(--muted); font-size:var(--text-small); text-align:center; }
+.vessel-strip { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.5rem 1rem; }
+.vessel-strip > div { display:flex; gap:.75rem; align-items:baseline; flex-wrap:wrap; }
+.vessel-strip > div:last-child { justify-content:flex-end; }
+.vessel-strip span { color:var(--muted); font-size:var(--text-small); }
+.control-hint { color:var(--muted); font-size:var(--text-small); }
+.instrument-strip { display:flex; flex-wrap:wrap; gap:.5rem 2rem; padding:.5rem 1rem; font-family:var(--terminal-font); font-variant-numeric:tabular-nums; }
+.flight-note { display:flex; justify-content:space-between; flex-wrap:wrap; gap:.5rem 1rem; font-size:var(--text-small); }
+.cockpit-route { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:.375rem 1.5rem; align-items:center; }
+.cockpit-route-heading { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
+.cockpit-route-heading h2 { color:var(--muted); font-size:var(--text-small); }
+#cockpit-destination { font-size:1.25rem; overflow-wrap:anywhere; }
+.cockpit-route dl { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
+.cockpit-route dt { color:var(--muted); font-size:var(--text-small); }
+.cockpit-route dd { margin:.125rem 0 0; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+#cockpit-route-source { grid-column:1/-1; font-size:var(--text-small); }
+main[data-narrow="true"] .health-radar { grid-template-columns:minmax(0,1fr) minmax(6rem,12rem) minmax(0,1fr); gap:.5rem; }
+main[data-narrow="true"] .vessel-strip { align-items:flex-start; }
+main[data-narrow="true"] .vessel-strip > div { display:grid; gap:.125rem; }
+main[data-narrow="true"] .cockpit-route { grid-template-columns:minmax(0,1fr); }
+main[data-narrow="true"] .health-reading strong { font-size:1.5rem; }
+main[data-small="true"] .health-radar { grid-template-columns:repeat(2,minmax(0,1fr)); }
+main[data-small="true"] .health-scope { grid-column:1/-1; grid-row:1; width:12rem; justify-self:center; }
+main[data-small="true"] .health-insets,main[data-small="true"] .cockpit-route dl { grid-template-columns:minmax(0,1fr); }
+@media(prefers-reduced-motion:reduce) { body[data-shield-offline="true"] .shell::after { animation:none; opacity:.6; } }

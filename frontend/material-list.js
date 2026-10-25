@@ -51,7 +51,8 @@ function renderMaterialRows(data) {
       pin.title = (row.Pinned ? "Unpin " : "Pin ") + row.Display;
       pin.setAttribute("aria-label", pin.title);
       pin.disabled = Boolean(data.PinsError);
-      select.setAttribute("aria-label", "View " + row.Display + " details");
+      select.setAttribute("aria-label", "View " + row.Display + " details" + (row.Note ? "; comment: " + row.Note : ""));
+      select.title = row.Display + (row.Note ? " — " + row.Note : "");
       const [name, stock, comment] = select.children;
       name.textContent = row.Display;
       name.title = row.Display;

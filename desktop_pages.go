@@ -219,7 +219,7 @@ func (m cockpitModel) desktopPageView() desktopPageView {
 			if s.Flags != nil {
 				fields = append(fields, field("Flags", fmt.Sprintf("0x%08X", *s.Flags)))
 			}
-			view.Panels = append(view.Panels, desktopPanel{Title: "Telemetry snapshot", Fields: fields})
+			view.Panels = append(view.Panels, desktopPanel{Title: "Telemetry snapshot", Collapsible: true, Fields: fields})
 		}
 	case pageHelp:
 		view.Source = "Co-pit flight companion"
@@ -227,7 +227,7 @@ func (m cockpitModel) desktopPageView() desktopPageView {
 			{Title: "Getting started", Lines: []string{"Start Elite Dangerous and select the EliteAuxPanel control preset.", "Focus Elite and press Ctrl+Alt+F9 to arm. Ctrl+Alt+F10 or STOP cancels controls.", "Changing focus pauses input; returning to the same authorised game resumes when checks pass."}},
 			{Title: "Your cockpit", Lines: []string{"Permanent ship controls are always present, in separate Toggles and Activatable buttons groups.", "Use + for supported fitted utilities, or enable automatic adding in Settings.", "A retained unavailable utility pulses dim red and cannot be clicked. Unknown availability stays unknown.", "Each tile shows its action's existing numpad key. Editing tiles does not rewrite game bindings."}},
 			{Title: "Pages and shortcuts", Lines: []string{"Use the page buttons, Ctrl+Tab or numpad plus/minus to move between pages.", "Ship and module condition use journal snapshots, with report times shown.", "Navigation can load community-reported station outfitting on request.", "Engineering: search, select a material, enter a target and save.", "Fire-group selectors are a manual reference; configure actual fire groups in game."}},
-			{Title: "Display", Lines: []string{"F11 enables borderless fullscreen for this session; Escape restores a window.", "Every launch starts windowed. Other display preferences remain saved.", "Settings includes row width, theme, portrait layout and adjustable scan-line spacing."}},
+			{Title: "Display", Lines: []string{"F11 enables borderless fullscreen for this session; Escape restores a window.", "Every launch starts windowed. Other display preferences remain saved.", "Settings includes saved interface size (100–200%), row width, theme, portrait layout and adjustable scan-line spacing."}},
 		}
 	}
 	return view

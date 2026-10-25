@@ -22,6 +22,16 @@ func TestExportDesktopUpgradeFixtures(t *testing.T) {
 		a.model.page = page
 		states[page] = a.GetState(110)
 	}
+	a.ShowOutfitting(true)
+	if err := a.SearchOutfittingStations("Sol", false); err != nil {
+		t.Fatal(err)
+	}
+	stations := waitDesktopOutfit(t, a, func(o outfitViewData) bool { return !o.Loading && len(o.Stations) > 0 })
+	if err := a.SelectOutfittingStation(stations.Stations[0].Key, false); err != nil {
+		t.Fatal(err)
+	}
+	waitDesktopOutfit(t, a, func(o outfitViewData) bool { return !o.Loading && len(o.Modules) > 0 })
+	states[9] = a.GetState(110)
 	data, err := json.Marshal(states)
 	if err != nil {
 		t.Fatal(err)

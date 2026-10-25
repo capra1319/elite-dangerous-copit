@@ -15,6 +15,8 @@
     <link rel="stylesheet" href="pages.css" />
     <link rel="stylesheet" href="navigation.css" />
     <link rel="stylesheet" href="health.css" />
+    <link rel="stylesheet" href="ship.css" />
+    <link rel="stylesheet" href="outfitting.css" />
   </head>
   <body>
     <div class="shell">
@@ -248,12 +250,14 @@
             </article>
           </div>
         </section>
-        <section
+        <details
           id="station-search-tools"
           class="station-search-tools panel"
           hidden
           aria-label="Station search"
         >
+          <summary>External station search · Inara ↗</summary>
+          <div class="station-search-content">
           <div>
             <label for="station-search-kind">Station search</label
             ><select id="station-search-kind"></select>
@@ -266,7 +270,8 @@
             and prices are community-reported. Exact live mission-board offers
             are not available here.
           </p>
-        </section>
+          </div>
+        </details>
         <section id="graphical-page" hidden>
           <p id="graphical-page-source"></p>
           <p id="graphical-page-message" class="muted" role="status" hidden></p>
@@ -278,10 +283,9 @@
             </div>
             <p class="ship-module-report">
               <span id="ship-modules-reported"></span>
-              <span>Journal snapshot · integrity is not a live damage feed.</span>
-              <span>Key systems are marked even when healthy. Red means reported damage to a key system.</span>
+              <span>Journal snapshot · live integrity and supply unavailable.</span>
             </p>
-            <p id="ship-power-report"></p>
+            <p id="ship-power-report"></p><details class="data-help"><summary>About module readings</summary><p>Integrity and configured ON/OFF are loadout snapshots, not live damage or power-supply readings. Red identifies reported damage to a key system; a key-system label alone does not mean damage.</p><p>Open the game’s right-hand Modules panel to refresh power draw and priority. Actual supply, plant output and overdraw shutdown causes are not reported. Zero MW does not mean a module has no power.</p></details>
             <p id="ship-module-summary" role="status"></p>
             <ul id="ship-module-list" class="ship-module-list" aria-label="Installed module integrity"></ul>
           </article>
@@ -375,7 +379,8 @@
           <div class="settings-grid">
             <article class="panel">
               <div class="eyebrow">WINDOW & DISPLAY</div>
-              <h2>Your second screen</h2>
+              <h2>Display</h2>
+              <div class="scale-setting"><label for="ui-scale">Interface size</label><div class="scale-controls"><select id="ui-scale" aria-describedby="ui-scale-help"><option value="100">100% · Standard</option><option value="125">125% · Larger</option><option value="150">150% · Large</option><option value="175">175% · Extra large</option><option value="200">200% · Maximum</option></select><button id="reset-ui-scale" type="button">Reset size</button></div><p id="ui-scale-help" class="muted">Enlarges text, controls and spacing across every page. Your Windows scaling still applies.</p><p class="scale-preview"><strong>Readable ship systems</strong> · 42.0 MW · Priority 1</p></div>
               <p class="muted">
                 Automatic layout follows the window shape, including a rotated
                 monitor.
@@ -424,7 +429,7 @@
             </article>
             <article class="panel">
               <div class="eyebrow">APPEARANCE</div>
-              <h2>Console style</h2>
+              <h2>Appearance</h2>
               <label for="theme">Theme</label
               ><select id="theme">
                 <option value="command-deck">Command Deck · amber</option>
@@ -435,7 +440,7 @@
                 <div>
                   <strong>Scan lines</strong>
                   <p class="muted">
-                    Subtle CRT overlay; controls stay readable.
+                    Static texture behind panel content. Radar gauges keep their own scan lines.
                   </p>
                 </div>
                 <input type="checkbox" id="scanlines" aria-label="Scan lines" />
@@ -451,7 +456,7 @@
             </article>
             <article id="control-layout-editor" class="panel control-layout-editor" aria-labelledby="control-layout-title">
               <div class="eyebrow">COCKPIT CONTROLS</div>
-              <div class="control-layout-heading"><h2 id="control-layout-title">Your ship controls</h2><button type="button" id="reset-cockpit-layout">Remove optional utilities</button></div>
+              <div class="control-layout-heading"><h2 id="control-layout-title">Controls</h2><button type="button" id="reset-cockpit-layout">Remove optional utilities</button></div>
               <p class="muted">Add, remove, reassign or reorder controls. Actions stay in their Toggle or Activatable button group. Each tile shows its action’s existing numpad key; layout edits do not change game bindings.</p>
               <div class="setting-row"><div><strong>Automatically add ship utilities</strong><p class="muted">Add every supported utility found in the reported ship loadout. Controls from previous ships stay on the panel.</p></div><input type="checkbox" id="auto-ship-controls" aria-label="Automatically add ship utilities"></div>
               <div class="control-layout-add"><button type="button" id="add-control-action-picker">+ Add ship controls</button></div>

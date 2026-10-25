@@ -1,0 +1,34 @@
+/* Ship cards own their layout and typography, separate from cockpit health. */
+main[data-page="4"] .graphical-page-panels { grid-template-columns:minmax(0,1fr); }
+main[data-page="4"] .graphical-fields { max-width:none; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0 1.25rem; }
+main[data-page="4"] .graphical-fields > div { grid-template-columns:minmax(0,1fr); gap:.25rem; }
+.ship-module-screen-heading { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.75rem; margin-bottom:.625rem; }
+#ship-module-total { color:var(--muted); font:var(--text-small) var(--terminal-font); }
+.ship-module-report,.ship-power-report,#ship-power-report { font-size:var(--text-small); color:var(--muted); }
+.ship-module-report span { display:block; }
+#ship-module-summary { font-size:var(--text-small); margin-top:.5rem; color:var(--muted); }
+#ship-module-summary[data-warning="true"] { color:var(--danger); }
+.ship-module-list { list-style:none; padding:0; margin:.875rem 0 0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.75rem; }
+.ship-module { min-width:0; display:flex; flex-direction:column; gap:.625rem; padding:.75rem; background:var(--bg); border:1px solid var(--line); border-left:3px solid var(--line); --module-ink:var(--muted); }
+.ship-module[data-key-system="true"] { --module-ink:var(--accent); border-left-color:var(--accent); }
+.ship-module[data-condition="unknown"] { border-left-style:dashed; }
+.ship-module[data-condition="critical"] { --module-ink:var(--danger); border-left-color:var(--danger); background:color-mix(in srgb,var(--danger) 6%,var(--bg)); }
+.ship-module[data-condition="damaged"] { --module-ink:var(--caution); border-left-color:var(--caution); }
+.ship-module-heading { display:flex; align-items:baseline; gap:.25rem .625rem; flex-wrap:wrap; }
+.ship-module h3 { font-size:1.25rem; font-weight:700; overflow-wrap:anywhere; }
+.ship-module-label { color:var(--module-ink); font-size:var(--text-small); }
+.ship-module-detail { font-size:var(--text-small); color:var(--muted); margin-top:.25rem; overflow-wrap:anywhere; }
+.module-power-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.375rem 1.25rem; margin-top:.625rem; max-width:42rem; }
+.module-power-fields > div { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:baseline; gap:.375rem; }
+.module-power-fields dt { color:var(--muted); font-size:var(--text-small); }
+.module-power-fields dd { margin:0; font-size:1rem; font-weight:650; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.ship-module-consequence { font-size:var(--text-small); margin-top:.5rem; color:var(--muted); }
+.ship-module-integrity { display:flex; gap:.75rem; align-items:center; margin-top:auto; }
+.ship-module-integrity strong { font:650 1rem var(--terminal-font); color:var(--module-ink); }
+.ship-module-integrity progress { appearance:none; flex:1; min-width:0; height:.375rem; border:0; color:var(--module-ink); background:var(--line); }
+.ship-module-integrity progress::-webkit-progress-bar { background:var(--line); }
+.ship-module-integrity progress::-webkit-progress-value { background:var(--module-ink); }
+main[data-narrow="true"][data-page="4"] .graphical-fields { grid-template-columns:repeat(3,minmax(0,1fr)); }
+main[data-ship-stack="true"] .ship-module-list { grid-template-columns:minmax(0,1fr); }
+main[data-small="true"][data-page="4"] .graphical-fields { grid-template-columns:repeat(2,minmax(0,1fr)); }
+main[data-small="true"] .module-power-fields { grid-template-columns:minmax(0,1fr); }

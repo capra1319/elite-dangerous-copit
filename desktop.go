@@ -29,6 +29,7 @@ import (
 var desktopAssets embed.FS
 
 type DesktopPreferences struct {
+	UIScale             int    `json:"uiScale"`
 	Version             int    `json:"version"`
 	Theme               string `json:"theme"`
 	Layout              string `json:"layout"`
@@ -41,11 +42,11 @@ type DesktopPreferences struct {
 }
 
 func defaultDesktopPreferences() DesktopPreferences {
-	return DesktopPreferences{Version: 1, Theme: "command-deck", Layout: "auto", ScanlineSpacing: 12, HealthDisplay: "ship"}
+	return DesktopPreferences{UIScale: 100, Version: 1, Theme: "command-deck", Layout: "auto", ScanlineSpacing: 12, HealthDisplay: "ship"}
 }
 func validDesktopPreferences(p DesktopPreferences) bool {
 	_, themeOK := themeIndex(p.Theme)
-	return (p.HealthDisplay == "" || p.HealthDisplay == "ship" || p.HealthDisplay == "bars") && p.Version == 1 && themeOK && (p.Layout == "auto" || p.Layout == "portrait" || p.Layout == "landscape") && p.ControlColumns >= 0 && p.ControlColumns <= 10 && (p.ScanlineSpacing == 0 || p.ScanlineSpacing >= 4 && p.ScanlineSpacing <= 24 && p.ScanlineSpacing%2 == 0)
+	return (p.UIScale == 0 || p.UIScale >= 100 && p.UIScale <= 200 && p.UIScale%25 == 0) && (p.HealthDisplay == "" || p.HealthDisplay == "ship" || p.HealthDisplay == "bars") && p.Version == 1 && themeOK && (p.Layout == "auto" || p.Layout == "portrait" || p.Layout == "landscape") && p.ControlColumns >= 0 && p.ControlColumns <= 10 && (p.ScanlineSpacing == 0 || p.ScanlineSpacing >= 4 && p.ScanlineSpacing <= 24 && p.ScanlineSpacing%2 == 0)
 }
 func loadDesktopPreferences(path string) (DesktopPreferences, error) {
 	p := defaultDesktopPreferences()
@@ -565,6 +566,9 @@ func (a *DesktopApp) PageKey(name string) {
 	}
 }
 func (a *DesktopApp) SavePreferences(p DesktopPreferences) error {
+	if p.UIScale == 0 {
+		p.UIScale = 100
+	}
 	if p.HealthDisplay == "" {
 		p.HealthDisplay = "ship"
 	}
@@ -573,6 +577,9 @@ func (a *DesktopApp) SavePreferences(p DesktopPreferences) error {
 	}
 	a.mu.Lock()
 	defer a.mu.Unlock()
+	if a.closing {
+		return errors.New("application is closing")
+	}
 	p.Fullscreen = a.prefs.Fullscreen
 	if err := writeDesktopPreferences(a.settingsPath, p); err != nil {
 		return err

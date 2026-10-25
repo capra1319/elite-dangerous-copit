@@ -1,8 +1,9 @@
 "use strict";
 let graphicalPageSignature = "";
+const readingLabels = Object.freeze(Object.assign(Object.create(null), {unknown:"Unknown",unavailable:"Unavailable","not reported":"Not reported",On:"ON",Off:"OFF"}));
 function pageText(tag, value, className = "") {
   const node = document.createElement(tag);
-  node.textContent = String(value ?? "");
+  node.textContent = String((tag === "dd" || tag === "td") ? readingLabels[value] ?? value ?? "" : value ?? "");
   if (className) node.className = className;
   return node;
 }
@@ -45,6 +46,10 @@ function graphicalPanel(data) {
   }
   return panel;
 }
+function fireGroupSummary(row) {
+  const assigned=(row.Groups || []).map((value,index)=>value>0 ? String.fromCharCode(65+index)+": "+(value===1?"Primary":"Secondary") : "").filter(Boolean);
+  return assigned.length ? "Manual reference · " + assigned.join(" · ") : "Manual reference · no trigger assignments recorded";
+}
 function hardpointCard(row) {
   const panel = document.createElement("article");
   panel.className = "panel graphical-hardpoint";
@@ -56,6 +61,10 @@ function hardpointCard(row) {
     const item=document.createElement("div");item.append(pageText("dt",label),pageText("dd",value));values.append(item);
   }
   panel.append(values);
+  const groupSummary = pageText("p",fireGroupSummary(row),"firegroup-summary");
+  panel.append(groupSummary);
+  const edit = document.createElement("details"); edit.className="firegroup-edit";
+  edit.append(pageText("summary","Edit manual fire-group reference"));
   const selectors=document.createElement("div");
   selectors.className="firegroup-selectors";
   for(let group=0;group<8;group++) {
@@ -72,12 +81,12 @@ function hardpointCard(row) {
       const value=Number(select.value);select.disabled=true;
       act(()=>api().SetFireGroupReference(row.Key,group,value)).then(()=>{
         const current=state?.PageView?.Hardpoints?.find(module=>module.Key===row.Key);
-        if(select.isConnected) {select.value=String(current?.Groups?.[group] ?? -1);select.disabled=false;}
+        if(select.isConnected) {select.value=String(current?.Groups?.[group] ?? -1);select.disabled=false;groupSummary.textContent=fireGroupSummary(current || row);}
       });
     });
     label.append(select);selectors.append(label);
   }
-  panel.append(selectors);
+  edit.append(selectors);panel.append(edit);
   return panel;
 }
 function renderGraphicalPage(data) {
@@ -93,13 +102,17 @@ function renderGraphicalPage(data) {
   if(signature===graphicalPageSignature) return;
   graphicalPageSignature=signature;
   const panels=document.getElementById("graphical-page-panels");
+  const openReferences = new Set([...panels.querySelectorAll(".graphical-hardpoint")].filter(card=>card.querySelector(".firegroup-edit")?.open).map(card=>card.dataset.module));
+  const focused = document.activeElement;
+  const focusReference = focused?.closest(".graphical-hardpoint") ? {key:focused.closest(".graphical-hardpoint").dataset.module,group:focused.dataset.group} : null;
   panels.replaceChildren();
   for(const panel of view.Panels || []) panels.append(graphicalPanel(panel));
   if(data.Page===8) {
     const grid=document.createElement("div");grid.className="hardpoint-card-grid";
-    for(const row of view.Hardpoints || []) grid.append(hardpointCard(row));
+    for(const row of view.Hardpoints || []) { const card=hardpointCard(row);card.querySelector(".firegroup-edit").open=openReferences.has(row.Key);grid.append(card); }
     if(!grid.children.length) grid.append(pageText("p","Waiting for reported hardpoints or utility modules.","muted"));
     panels.append(grid);
+    if(focusReference) {const card=[...grid.children].find(card=>card.dataset.module===focusReference.key);const select=[...card?.querySelectorAll("select") || []].find(select=>select.dataset.group===focusReference.group);select?.focus({preventScroll:true});}
   }
   if(data.Page===2) {
     const links=document.createElement("div");links.className="help-page-actions";

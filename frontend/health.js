@@ -9,7 +9,7 @@ function renderShipHealth(data) {
   const display = data.Preferences?.healthDisplay === "bars" ? "bars" : "ship";
   $("ship-health").dataset.display = display;
   for (const [name,value] of [["hull",hull],["shield",shield]]) {
-    const label = value === null ? name === "shield" && health.ShieldState === "UP" ? "UP · % unavailable" : "Unknown" : Math.round(value) + "%";
+    const label = value === null ? name === "shield" && health.ShieldState === "UP" ? "UP" : "Unknown" : Math.round(value) + "%";
     document.querySelectorAll('[data-health-value="'+name+'"]').forEach(node => node.textContent = label);
     document.querySelectorAll('[data-health-meter="'+name+'"]').forEach(node => {
       node.style.setProperty("--health-level",(value ?? 0)+"%");

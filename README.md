@@ -214,7 +214,7 @@ The public EDSM service supplies community-reported availability, not guaranteed
 
 ## Compact square controls and row width
 
-The glass controls stay at 112 x 112 pixels, including the inner square lens, with 48 px icons and the component name above. Technical stencils and UNKNOWN/ACTION notes sit below the button so they do not cover the icon or key label.
+At standard interface size the glass controls use 112 x 112 pixel squares with 48 px icons and the component name above. Settings > Display > Interface size scales the whole interface, including the square lenses and icons. Technical stencils and UNKNOWN/ACTION notes sit below the button so they do not cover the icon or key label.
 
 In Settings > Window & Display, use Buttons per row to choose Automatic or 1-10 columns. The selected count is the maximum: narrow windows fit fewer columns without shrinking or stretching the squares. Widening the window restores your chosen count. Automatic uses up to five columns. The choice saves in the existing Co-pit window.json appearance preferences and does not affect arming or controls. Existing settings without this field continue to use Automatic.
 
@@ -239,7 +239,7 @@ Clicking away, data refreshes, switching materials or changing pages preserves u
 
 Co-pit material pins save separately in `%APPDATA%\Co-pit\engineering-pins.json` and survive restarts. A pin does not set or remove a target quantity. Simulator pins stay in memory. Opening Engineering or filtering the list does not select an item automatically. Clicking a material (or using the list keyboard controls) opens its details; the close button returns to the full-width list. Saved comments appear in the Comment column without wrapping; hover for the full text or open the item to edit it.
 
-Page menu labels and headings scale with the window: landscape uses a growing sidebar and 13–26 px menu labels; portrait uses 11–24 px labels and three columns on narrow windows so full page names remain visible.
+All pages now share readable text and spacing. Settings > Display > Interface size saves a scale from 100% to 200%; Windows display scaling still applies. Navigation changes arrangement with available space rather than shrinking its labels. See docs/visual-readability-implementation.md for the layout changes and test instructions.
 
 
 ## Cockpit health displays and module power

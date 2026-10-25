@@ -31,7 +31,9 @@ function updateControlColumns() {
     const style = getComputedStyle(container);
     const width = container.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
     const gap = parseFloat(style.columnGap) || 0;
-    const capacity = Math.max(1, Math.floor((width + gap) / (112 + gap)));
+    const unit = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const tileWidth = Math.max(container.querySelector(".cockpit-switch")?.getBoundingClientRect().width || 7 * unit,8 * unit);
+    const capacity = Math.max(1, Math.floor((width + gap) / (tileWidth + gap)));
     const requested = Number(preferences?.controlColumns || 0);
     const desired = Number.isInteger(requested) && requested >= 1 && requested <= 10 ? requested : 5;
     const columns = Math.min(desired, capacity, container.children.length || 1);

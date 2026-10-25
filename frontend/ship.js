@@ -5,7 +5,7 @@ function renderShipModules(data) {
   panel.hidden = data.Page !== 4;
   if (data.Page !== 4) return;
   const rows = data.ShipModules || [];
-  text("ship-power-report", "Draw / priority report: " + (data.ShipPowerAt || "not reported") + ". Open the game’s Modules panel to refresh. Configured switch is a loadout snapshot; actual supply and overdraw shutdowns are not reported." + (data.ShipPowerError ? " Latest read: " + data.ShipPowerError : ""));
+  text("ship-power-report", "Power / priority snapshot: " + (data.ShipPowerAt || "not reported") + (data.ShipPowerError ? " · Read error: " + data.ShipPowerError : ""));
   text("ship-modules-reported", "Last loadout report: " + (data.ShipModulesAt || "not reported"));
   text("ship-module-total", String(rows.length).padStart(2, "0") + " INSTALLED");
   const damagedKey = rows.filter(row => row.Condition === "critical").length;
@@ -37,6 +37,7 @@ function renderShipModules(data) {
     const detail = document.createElement("p");
     detail.className = "ship-module-detail";
     detail.textContent = row.Slot;
+    detail.title = row.Item;
     body.append(heading, detail);
     const power = document.createElement("dl"); power.className = "module-power-fields";
     for (const [title,value] of [["Power draw",row.Draw],["Priority",row.Priority],["Configured switch",row.ConfiguredPower],["Actual supply",row.Supply]]) {

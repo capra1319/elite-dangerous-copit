@@ -38,9 +38,8 @@ function resolveOrientation() {
   const layout = preferences?.layout || "auto";
   const portrait =
     layout === "portrait" || (layout === "auto" && innerHeight > innerWidth);
-  document.documentElement.dataset.orientation = portrait
-    ? "portrait"
-    : "landscape";
+  const orientation = portrait ? "portrait" : "landscape";
+  if (document.documentElement.dataset.orientation !== orientation) document.documentElement.dataset.orientation = orientation;
   text("orientation", portrait ? "PORTRAIT" : "LANDSCAPE");
 }
 function applyScanlineSpacing(value) {
@@ -48,15 +47,34 @@ function applyScanlineSpacing(value) {
   document.documentElement.style.setProperty("--scanline-start", (value - 2) + "px");
   text("scanline-spacing-value",value + " px");
 }
+function resolveContentLayout() {
+  const main = $("main"), unit = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const compactNav = String(innerWidth / unit < 42);
+  if (document.documentElement.dataset.compactNav !== compactNav) document.documentElement.dataset.compactNav = compactNav;
+  const width = (main.clientWidth - 2 * parseFloat(getComputedStyle(main).paddingLeft)) / unit;
+  if (main.dataset.narrow !== String(width < 62)) main.dataset.narrow = String(width < 62);
+  if (main.dataset.small !== String(width < 34)) main.dataset.small = String(width < 34);
+  if (main.dataset.shipStack !== String(width < 44)) main.dataset.shipStack = String(width < 44);
+  if (main.dataset.tightHeight !== String(main.clientHeight / unit < 34)) main.dataset.tightHeight = String(main.clientHeight / unit < 34);
+  const columns = String(Math.max(2,Math.min(5,Math.floor(innerWidth / unit / 9))));
+  if (document.documentElement.style.getPropertyValue("--nav-columns") !== columns) document.documentElement.style.setProperty("--nav-columns",columns);
+  updateControlColumns();
+}
+function applyUIScale(value) {
+  const scale = [100,125,150,175,200].includes(value) ? value : 100;
+  const size = (16 * scale / 100) + "px";
+  if (document.documentElement.style.fontSize !== size) document.documentElement.style.fontSize = size;
+  $("ui-scale").value = String(scale);
+}
 function applyPreferences(p) {
   preferences = p;
+  applyUIScale(p.uiScale || 100);
   $("health-display").value = p.healthDisplay || "ship";
   document.documentElement.dataset.theme = p.theme;
   document.body.classList.toggle("scanlines", p.scanlines);
   $("theme").value = p.theme;
   $("layout").value = p.layout;
   $("control-columns").value = String(p.controlColumns || 0);
-  updateControlColumns();
   $("scanlines").checked = p.scanlines;
   $("auto-ship-controls").checked = Boolean(p.autoAddShipControls);
   if (document.activeElement !== $("scanline-spacing")) $("scanline-spacing").value = String(p.scanlineSpacing || 12);
@@ -132,7 +150,7 @@ function renderEngineering(data) {
   $("remove-target").disabled = !selected?.Target;
   text(
     "material-message",
-    data.Message || "Targets save automatically after you press Save target.",
+    data.Message || "Press Save target to keep this quantity.",
   );
 }
 function renderStationSearch(data) {
@@ -230,6 +248,7 @@ function render(data) {
     );
   }
   if (data.Page === 7) renderEngineering(data.Engineering);
+  resolveContentLayout();
   if (oldPage !== data.Page) {
     $("main").scrollTop = 0;
   }
@@ -465,3 +484,7 @@ poll();
 
 $("health-display").addEventListener("change",event => savePreference("healthDisplay",event.target.value));
 $("cockpit-open-navigation").addEventListener("click",()=>setPage(5));
+
+$("ui-scale").addEventListener("change",event => { const scale=Number(event.target.value);applyUIScale(scale);resolveContentLayout();savePreference("uiScale",scale); });
+$("reset-ui-scale").addEventListener("click",()=>{applyUIScale(100);resolveContentLayout();savePreference("uiScale",100);});
+window.addEventListener("resize",resolveContentLayout);
