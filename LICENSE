@@ -1,0 +1,92 @@
+Co-pit Noncommercial License 1.0
+License identifier: LicenseRef-Co-pit-Noncommercial-1.0
+
+Copyright (c) 2026 CapraarpaC
+
+1. Scope
+
+In these terms, "Licensor" means CapraarpaC. "Software" means the original
+Co-pit / Elite Aux code, documentation and other project materials to which
+the Licensor holds copyright, unless those materials specify different terms.
+A "Derivative" is a modification or other work based on the Software that
+requires permission under the Licensor's copyright. These terms grant only
+rights that the Licensor is entitled to grant.
+
+2. Noncommercial permission
+
+Subject to these conditions, you may view, run, copy, modify and redistribute
+the Software and Derivatives, in source or binary form, without a license fee
+for noncommercial purposes. This includes personal use, learning, experiments
+and free community forks that do not engage in Monetization as defined below.
+
+Ordinary end-user use of Co-pit while playing, recording or streaming gameplay
+is permitted, including on a monetized channel, provided that you are not
+selling or charging for the Software, a Derivative, or access to either.
+
+3. Monetization requires a separate agreement
+
+This license does not grant permission to monetize the Software or a
+Derivative. Before doing so, you must obtain a separate written commercial
+license agreement from the Licensor covering the proposed activity.
+
+"Monetization" includes:
+
+  a. Selling, licensing, renting, or otherwise charging for copies of, access
+     to, or features or functionality of the Software or a Derivative;
+  b. Including the Software or a Derivative in a paid product or service,
+     including a subscription or hosted service;
+  c. Earning advertising, sponsorship, affiliate, or similar revenue through
+     the Software, a Derivative, or their distribution; and
+  d. Soliciting or accepting donations, tips, crowdfunding, or other payments
+     specifically tied to developing, distributing, providing, or supporting
+     the Software or a Derivative, including paid support or customization.
+
+These restrictions apply even if the Software or Derivative is distributed
+without an upfront charge, its source code is published, the distributor is
+a nonprofit organization, or the activity has not yet made a net profit.
+Publishing source code does not create an exception to this section.
+
+A commercial agreement may specify royalties, fees, permitted activities and
+other negotiated terms. This license sets no royalty percentage or payment
+schedule, grants no automatic commercial permission, and does not by itself
+create an agreement to pay a particular royalty.
+
+4. Attribution and redistribution
+
+Copies or substantial portions of the Software must retain this license and
+the Licensor's copyright notice. A binary distribution must include them in
+its accompanying license or notice files. Clearly identify modified versions
+as modified, retain attribution to the original project, and do not imply
+that the Licensor endorses or produced your modified version.
+
+You may license your own original additions separately, but doing so does
+not remove these conditions from the Software or authorize Monetization of
+a Derivative containing it. Recipients receive permission for the Software
+only under these terms or a separate applicable license from the Licensor.
+
+5. Third-party rights and exceptions under law
+
+Third-party dependencies and separately identified materials remain governed
+by their own licenses, including the notices in licenses/. These terms do
+not replace, restrict, or relicense those third-party materials on their own.
+No trademark rights or endorsement rights are granted beyond the attribution
+required here. Rights and exceptions available to you under applicable law
+are not limited by these terms.
+
+6. Warranty and liability
+
+THE SOFTWARE IS PROVIDED "AS IS". TO THE EXTENT PERMITTED BY LAW, THE LICENSOR
+MAKES NO WARRANTIES AND ACCEPTS NO LIABILITY FOR LOSS OR DAMAGE ARISING FROM
+THE SOFTWARE OR ITS USE. NOTHING HERE EXCLUDES RIGHTS OR LIABILITY THAT
+CANNOT LAWFULLY BE EXCLUDED.
+
+7. Commercial inquiries
+
+The project maintainer's GitHub profile is:
+https://github.com/capra1319
+
+The canonical project repository is:
+https://github.com/capra1319/elite-dangerous-copit
+
+An inquiry, donation, public source release, or unanswered request is not a
+commercial license. Obtain the written agreement before Monetization.
