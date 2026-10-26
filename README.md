@@ -1,5 +1,14 @@
 # Co-pit — Wails desktop worktree
 
+**License: source-available, noncommercial reuse.** Copyright (c) 2026 CapraarpaC.
+You may use, modify and share noncommercial versions with attribution under
+the [Co-pit Noncommercial License 1.0](LICENSE). Monetizing Co-pit or a fork
+requires a separate written commercial agreement, even when its source is
+public. No royalty rate is automatically granted or assumed. See
+[commercial licensing](COMMERCIAL.md). Existing third-party notices in
+[licenses/](licenses/) retain their own terms.
+
+
 Open **Start-Co-pit.cmd** or **build/bin/Co-pit.exe** after building.
 
 - Pages in both apps: **Cockpit → Ship → Navigation → Missions → Hardpoints → Engineering → Settings → Diagnostics → Help**. Existing F-key shortcuts stay the same. In Co-pit use the page buttons, Ctrl+Tab / Ctrl+Shift+Tab, or Num+/Num−. The terminal uses Tab/Shift+Tab and numbered console tabs.
