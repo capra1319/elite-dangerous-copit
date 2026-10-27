@@ -25,6 +25,8 @@ The launchers open the new cockpit automatically. Close an already-running app a
 
 ## Navigation
 
+Pages follow the same flight-first order in both apps: **Cockpit → Ship → Navigation → Missions → Hardpoints → Engineering → Settings → Diagnostics → Help**. Tab/Shift+Tab and Num+/Num− follow this order; existing function-key shortcuts stay the same. The terminal uses numbered console tabs and a persistent connection/arming strip.
+
 | Key | Action |
 |---|---|
 | Tab / Shift+Tab | Cycle all nine pages forward/backward |
@@ -77,14 +79,24 @@ Use **Up/Down** and **PgUp/PgDn** to scroll Ship, Navigation and Missions. Engin
 
 ### Set engineering targets
 
-1. Press **F9**, then **/** and type a material name; press **Enter** to finish searching. Materials you do not own are included in the catalogue.
+1. Press **F9** and start typing a material name. The visible SEARCH field filters immediately; materials you do not own are included.
 2. Select a material with **Up/Down**, then press **Enter** to edit its target quantity.
 3. Type the quantity and press **Enter** to save, or **Esc** to cancel. The first digit replaces the prefilled quantity.
-4. Press **P** to switch between pinned targets and all materials. **Delete** removes the selected target. **/** starts a new search; Esc while searching clears the filter.
+4. **F2** switches all materials/pinned targets. Top-row **+ / -** adjusts a selected target by one; **Delete** removes it. **Esc** clears a search or cancels an edit, then returns to the cockpit when neither is active. You can paste a target quantity. Mock target edits stay in memory.
 
 Rows show **owned / target / still needed** and automatically mark a target complete when reported inventory reaches it. Targets are saved to `engineering-goals.json` beside appearance settings (`%APPDATA%\EliteAux` by default). `-goals PATH` selects a separate file. Saving targets does not change game files, bindings or appearance settings. Mock mode uses explicitly simulated journal examples and never reads real journal data.
 
 Journal pages display last-recorded data while disconnected. Mission details outside the 32-file history may be unavailable; live mission progress is shown only when the game reports it. The offline material and ship-name catalogues are attributed in [data/MATERIAL-SOURCE.md](data/MATERIAL-SOURCE.md); unknown game symbols remain visible.
+
+### Station search
+
+On **Navigation (F7)** press **S** to open the station-search picker, use **Up/Down** to choose a category, then **Enter** to open Inara in your default browser. **Esc** returns to Navigation. Co-pit's Navigation page has the same category selector and an **Open Inara** button.
+
+Categories cover stations/services, outfitting/ships/personal equipment, commodities, ship-engineering material traders, and Odyssey component listings. Search/filter on Inara by reference system, item, pad size, service or other criteria offered by that tool. Enter the displayed current system in Inara's near-system field; no commander/journal data is automatically put into links. The Inara shortcut opens your browser only after your explicit choice. The separate built-in EDSM outfitting viewer described below makes on-demand HTTPS requests; neither feature polls online data automatically or needs an account/API key.
+
+These are community-reported listings, not guaranteed real-time stock. Check the update age before travelling. Ship engineering materials are exchanged at traders; Odyssey component listings cover reported carrier trading. Exact live mission-board offers are not included; the app's Mission Board continues to show journal-recorded accepted missions. The browser remains a separate visible application when the companion closes.
+
+Sources: [Inara station search](https://inara.cz/elite/nearest-stations/), [outfitting](https://inara.cz/elite/nearest-outfitting/), [commodities](https://inara.cz/elite/commodities/), [components](https://inara.cz/elite/market-materials/).
 
 ## Connection scanner
 
@@ -119,7 +131,7 @@ Toggle labels describe reported game state. A pending request shows WAIT while r
 | Num8 | Next fire group |
 | Num9–0 | Heat sink, chaff |
 
-Turn **Num Lock on**. Mock numpad mode needs the app focused and distinguishes numpad keys from top-row digits when the terminal supplies physical key identity. In real-game mode, keep **Elite focused** and use **Ctrl+Alt+F9** to arm/disarm or **Ctrl+Alt+F10** to stop. Focus loss automatically disarms. Returning to the app to browse pages therefore disarms it too.
+Turn **Num Lock on**. Mock numpad mode needs the app focused and distinguishes numpad keys from top-row digits when the terminal supplies physical key identity. In real-game mode, keep **Elite focused** and use **Ctrl+Alt+F9** to arm/disarm or **Ctrl+Alt+F10** to stop. Focus loss **pauses** controls and releases flight hotkeys. Returning to the same running game automatically resumes after telemetry, bindings, closed panels and released keys are checked. Stop (Ctrl+Alt+F10 or D), manual disarm, lost/invalid telemetry, changed bindings, delivery failure, mode switching, game exit/restart or app exit/crash cancels that permission; arm manually again. The process creation time prevents PID reuse from inheriting arming. Pending actions are discarded, never replayed.
 
 The matching map key closes a map in the real game; Enter closes simulated maps. Mock never sends game input. Real keyboard output still requires the guarded backend's preset, telemetry, game-focus, arming and flight-context checks.
 
@@ -148,7 +160,7 @@ The default mode is `control`, with numpad input selected automatically. `-inter
 
 ## Build
 
-Source needs **Go 1.26+**. Dependencies are pinned in go.mod/go.sum; the first source build needs downloads. Libraries are compiled into the Windows executable, so normal use is offline.
+Source needs **Go 1.26+**. Dependencies are pinned in go.mod/go.sum; the first source build needs downloads. Libraries are compiled into the Windows executable. Local journal and control features work offline; explicitly requested station lookups need internet access.
 
 ```powershell
 go mod download
@@ -162,3 +174,16 @@ See [TEST-RESULTS.md](TEST-RESULTS.md) for verification and outstanding gameplay
 See [FEATURE-IDEAS.md](FEATURE-IDEAS.md) for extra toggle controls, navigation, audio alerts, journal pages and later USB-serial hardware integration.
 
 References: [Bubble Tea](https://github.com/charmbracelet/bubbletea), [Lip Gloss](https://github.com/charmbracelet/lipgloss), [Frontier Journal Manual](https://hosting.zaonce.net/community/journal/v32/Journal_Manual-v32.pdf).
+
+
+## Module integrity and terminal screens
+
+Ship details mark power plant, thrusters, FSD, life support, canopy, power distributor, sensors and shield generator as key systems. Any reported damage to one is highlighted red with a possible failure-impact note. Other reported module damage uses the theme accent; missing or invalid integrity stays Unknown without an invented percentage. Healthy key systems stay marked for reference. Power ON/OFF is shown separately and is not treated as proof of damage or failure.
+
+These are presentation warnings, not a prediction that a module has failed or a claim about an in-game malfunction threshold. Integrity comes from the last Loadout journal report; its timestamp stays visible, including when the game is closed. There is no live module-health stream. The terminal uses KEY, ! KEY and CHECK markers; Co-pit adds coloured rows, explicit text labels and integrity meters. No warning triggers a game action. Opt-in simulation includes healthy, damaged and unknown examples.
+
+## Built-in station outfitting
+
+On Navigation press O in Elite Aux, or select Station outfitting in Co-pit. Enter a system (or use the current system), explicitly load its stations, then select a station to load reported modules. Filter locally by module name, category, class or rating in Co-pit. In Elite Aux type a module search such as 5A drive, use F3 for category, F2 to change system, Ctrl+R to refresh and Esc to go back/cancel.
+
+The public EDSM service supplies community-reported availability, not guaranteed current stock. The report's update date is separate from retrieval time and may be unavailable or old. Prices, quantities and live mission offers are not supplied. A class-zero outfitting item is shown as a utility mount. Simulation returns examples without internet access. Real requests happen only on Load, station selection or Refresh; there is no automatic online polling. Cancel, leaving the viewer, switching mode and closing the app cancel owned requests. Cached results live only in memory for up to ten minutes.

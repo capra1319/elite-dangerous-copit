@@ -21,7 +21,7 @@ type display struct {
 	controlStatus string
 	screen        *terminalScreen
 	publish       func(dashboardFrame)
-	requests      <-chan string
+	requests      <-chan controlRequest
 	pending       string
 	gameFocused   bool
 	navigate      func(int)

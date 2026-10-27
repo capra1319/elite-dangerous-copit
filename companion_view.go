@@ -39,22 +39,23 @@ func reportedAt(stamp time.Time) string {
 }
 
 func (m cockpitModel) pageTabs(width int) string {
-	labels := []string{"COCKPIT", "DIAGNOSTICS", "HELP", "SETTINGS", "SHIP", "NAVIGATION", "MISSIONS", "ENGINEERING", "HARDPOINTS"}
+	position := pagePosition(m.page)
 	start := 0
 	if width < 110 {
-		start = max(0, m.page-1)
+		start = max(0, position-1)
 	}
 	var tabs []string
 	if start > 0 {
 		tabs = append(tabs, ink("‹", m.palette().Muted))
 	}
-	for i := start; i < len(labels); i++ {
-		label := ink(" "+labels[i]+" ", m.palette().Muted)
-		if i == m.page {
-			label = m.chip(labels[i], m.palette().Accent)
+	for i := start; i < len(flightPages); i++ {
+		name := fmt.Sprintf("%02d/%s", i+1, strings.ToUpper(flightPages[i].Name))
+		label := ink(" "+name+" ", m.palette().Muted)
+		if i == position {
+			label = m.chip(name, m.palette().Accent)
 		}
 		candidate := strings.Join(append(append([]string(nil), tabs...), label), " ")
-		if ansi.StringWidth(candidate)+2 > width && i > m.page {
+		if ansi.StringWidth(candidate)+2 > width && i > position {
 			tabs = append(tabs, ink("›", m.palette().Muted))
 			break
 		}
@@ -83,7 +84,7 @@ func (m cockpitModel) journalStatus() string {
 	return prefix + " · " + reportedAt(m.companion.LastEvent)
 }
 
-func (m cockpitModel) shipOverviewPage(width int) string {
+func (m cockpitModel) shipOverviewSummary(width int) string {
 	ship := m.companion.Ship
 	name := ship.Name
 	if name == "" {
@@ -122,22 +123,38 @@ func (m cockpitModel) shipOverviewPage(width int) string {
 		lines = append(lines, fmt.Sprintf("Rebuy        %.0f CR (last reported)", *ship.Rebuy))
 	}
 	lines = append(lines, "Loadout      "+reportedAt(ship.Updated))
-	modules := []string{m.section(fmt.Sprintf("INSTALLED MODULES / %d", len(ship.Modules))), "Last reported loadout; module health is not a live feed."}
+	return m.panel(width, m.palette().Border, lines...)
+}
+
+func (m cockpitModel) shipOverviewPage(width int) string {
+	ship := m.companion.Ship
+	modules := []string{m.section(fmt.Sprintf("INSTALLED MODULES / %d", len(ship.Modules))),
+		"Last loadout report: " + reportedAt(ship.ModulesAt),
+		"Integrity is a snapshot, not a live damage feed.",
+		"! KEY = damaged key system; CHECK = other damage."}
 	if len(ship.Modules) == 0 {
 		modules = append(modules, "Loadout details have not been reported yet.")
 	}
-	for _, module := range ship.Modules {
-		health := "?"
-		if module.Health != nil {
-			health = fmt.Sprintf("%.0f%%", *module.Health*100)
+	for _, row := range shipModuleRows(ship.Modules) {
+		marker, colour := "    ", m.palette().Text
+		if row.KeySystem {
+			marker, colour = "KEY ", m.palette().Accent
 		}
-		on := "OFF"
-		if module.On {
-			on = "ON"
+		switch row.Condition {
+		case "critical":
+			marker, colour = "! KEY ", m.palette().Danger
+		case "damaged":
+			marker, colour = "CHECK ", m.palette().Warning
+		case "unknown":
+			marker, colour = "? ", m.palette().Muted
 		}
-		modules = append(modules, safeText(module.Slot)+" · "+symbolText(module.Item)+" · "+on+" · "+health)
+		modules = append(modules, ink(marker+row.Health+" · "+row.Power+" · "+row.Name, colour))
+		modules = append(modules, ink("  "+row.Slot+" · "+row.Item, m.palette().Muted))
+		if row.KeySystem {
+			modules = append(modules, ink("  "+row.Consequence, colour))
+		}
 	}
-	return m.panel(width, m.palette().Border, lines...) + "\n" + m.panel(width, m.palette().Border, modules...)
+	return m.shipOverviewSummary(width) + "\n" + m.panel(width, m.palette().Border, modules...)
 }
 
 func (nav navigationData) currentRouteIndex() int {
@@ -153,6 +170,12 @@ func (nav navigationData) currentRouteIndex() int {
 }
 
 func (m cockpitModel) navigationPage(width int) string {
+	if m.outfitting.Active {
+		return m.outfittingPage(width)
+	}
+	if m.stationSearchActive {
+		return m.stationSearchPanel(width)
+	}
 	nav := m.companion.Nav
 	target, class := nav.Target, nav.TargetClass
 	index := nav.currentRouteIndex()
@@ -174,7 +197,7 @@ func (m cockpitModel) navigationPage(width int) string {
 			}
 		}
 	}
-	lines := []string{m.section("NAVIGATION"), ink(m.journalStatus(), m.palette().Muted), "",
+	lines := []string{m.section("NAVIGATION"), ink(m.journalStatus(), m.palette().Muted), ink("O  Station outfitting    S  Browser search", m.palette().Accent),
 		"Current system   " + reportedText(nav.System), "Body             " + reportedText(nav.Body), "Station          " + reportedText(nav.Station),
 		"Next target      " + reportedText(target), "Star class       " + reportedText(class), "Distance         " + distance, "Remaining jumps  " + remaining}
 	if target != "" && class != "" {
@@ -289,14 +312,15 @@ func (m cockpitModel) missionBoardPage(width int) string {
 func (m cockpitModel) engineeringPage(width int) string {
 	rows := m.materialRows()
 	index := min(max(0, m.materialIndex), max(0, len(rows)-1))
-	view := "All materials; pinned targets first"
+	view := "ALL MATERIALS / targets first"
 	if m.onlyPinned {
-		view = "Pinned targets only"
+		view = "PINNED TARGETS"
 	}
-	if m.materialFilter != "" {
-		view += " · /" + safeText(m.materialFilter)
+	search := m.materialFilter
+	if search == "" {
+		search = "type a material name…"
 	}
-	lines := []string{m.section("ENGINEERING / MATERIAL CHECKLIST"), ink(m.journalStatus(), m.palette().Muted), view,
+	lines := []string{m.section("ENGINEERING // MATERIAL TERMINAL"), "SEARCH > " + safeText(search) + "▏", view + " · F2 switches list",
 		ink("Material                       Owned / target / need", m.palette().Muted)}
 	visible := max(1, m.height-16)
 	start := max(0, index-visible+1)
@@ -329,14 +353,17 @@ func (m cockpitModel) engineeringPage(width int) string {
 		lines = append(lines, ink(between(left, value, width-4), colour))
 	}
 	if len(rows) == 0 {
-		lines = append(lines, "No matches. P toggles pinned/all; / starts a new search.")
+		lines = append(lines, "No matches. Esc clears search. F2 shows all/pinned.")
 	}
-	detail := "Targets are your own quantities, not blueprint recipes."
+	detail := "↑↓ select · Enter target · +/- adjust · Delete remove"
 	if len(rows) > 0 {
 		row := rows[index]
 		detail = fmt.Sprintf("%d/%d · %s · Enter sets a material target", index+1, len(rows), row.Category)
 	}
 	lines = append(lines, ink(safeText(detail), m.palette().Muted))
+	if m.goalEditing {
+		lines = append(lines, bold("TARGET > "+string(m.goalDigits)+"▏  Enter save / Esc cancel", m.palette().Accent))
+	}
 	return m.panel(width, m.palette().Border, lines...)
 }
 
@@ -344,9 +371,15 @@ func mockCompanionData(now time.Time) companionData {
 	d := newCompanionData()
 	d.Commander, d.GameMode, d.Source, d.LastEvent = "DEMO COMMANDER", "SIMULATED", "SIMULATED", now
 	hull, tank, jump, rebuy := .94, 32.0, 27.4, 1200000.0
+	healthy, plantHealth, shieldHealth := 1.0, .87, .76
 	d.Ship = shipOverview{Type: "Krait Mk II", Name: "Wayfarer", Ident: "DEMO-01", Hull: &hull, Tank: &tank, MaxJump: &jump, Rebuy: &rebuy, Updated: now, HullAt: now}
 	d.Ship.ModulesAt = now
 	d.Ship.Modules = []shipModule{
+		{Slot: "PowerPlant", Item: "int_powerplant_size6_class5", On: true, Health: &plantHealth},
+		{Slot: "MainEngines", Item: "int_engine_size6_class5", On: true, Health: &healthy},
+		{Slot: "FrameShiftDrive", Item: "int_hyperdrive_size5_class5", On: true, Health: &healthy},
+		{Slot: "LifeSupport", Item: "int_lifesupport_size4_class1", On: true},
+		{Slot: "Slot01_Size6", Item: "int_shieldgenerator_size6_class5", On: true, Health: &shieldHealth},
 		{Slot: "LargeHardpoint1", Item: "hpt_pulselaser_fixed_large", On: true, Health: &hull},
 		{Slot: "LargeHardpoint2", Item: "hpt_multicannon_gimbal_large", On: true, Health: &hull, AmmoInClip: integer(90), AmmoInHopper: integer(1800)},
 		{Slot: "MediumHardpoint1", Item: "hpt_beamlaser_turret_medium", On: true, Health: &hull},

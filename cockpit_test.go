@@ -219,7 +219,7 @@ func TestCockpitTypedCommandsScenarioAndInputSwitch(t *testing.T) {
 
 func TestCockpitRealGameInputIsOwnedByGuardedBackend(t *testing.T) {
 	m := newCockpit(cockpitOptions{mode: "control", controls: "numpad"}, testNow)
-	requests := make(chan string, 2)
+	requests := make(chan controlRequest, 2)
 	m.requests = requests
 	m.frame.State = cloneSnapshot(&newMock(testNow).State)
 	m.frame.ControlStatus = "ARMED"
@@ -228,7 +228,7 @@ func TestCockpitRealGameInputIsOwnedByGuardedBackend(t *testing.T) {
 		t.Fatal("UI key directly changed/sent real-game state")
 	}
 	m = updateCockpit(t, m, tea.KeyPressMsg{Code: 'd', Text: "d"})
-	if <-requests != "disarm" || m.frame.ControlStatus != "ARMED" {
+	if (<-requests).Kind != "stop" || m.frame.ControlStatus != "ARMED" {
 		t.Fatal("UI should request disarm and wait for backend confirmation")
 	}
 }

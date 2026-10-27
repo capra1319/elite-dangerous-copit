@@ -88,7 +88,7 @@ func TestSettingsPreviewCancelApplyAndIsolation(t *testing.T) {
 func TestSettingsSaveFailureAndAlternateNavigation(t *testing.T) {
 	// A directory cannot be replaced by a JSON file on any supported platform.
 	m := newCockpit(cockpitOptions{mode: "live", settings: t.TempDir()}, testNow)
-	for i := 0; i < pageSettings; i++ {
+	for i := 0; i < pagePosition(pageSettings); i++ {
 		m = updateCockpit(t, m, tea.KeyPressMsg{Code: tea.KeyTab})
 	}
 	m = updateCockpit(t, m, tea.KeyPressMsg{Code: tea.KeyDown})

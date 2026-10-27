@@ -60,7 +60,7 @@ type cockpitModel struct {
 	command                    []rune
 	held                       map[rune]bool
 	history                    []activity
-	requests                   chan<- string
+	requests                   chan controlRequest
 	backend                    tea.Cmd
 	work                       *sessionWork
 	scenario                   int
@@ -94,6 +94,10 @@ type cockpitModel struct {
 	bootActive                 bool
 	bootStarted                time.Time
 	bootElapsed                time.Duration
+	stationSearchActive        bool
+	stationSearchIndex         int
+	stationSearchMessage       string
+	outfitting                 outfittingState
 }
 
 func cloneSnapshot(s *Snapshot) *Snapshot {
@@ -253,6 +257,12 @@ func (m *cockpitModel) mockAction(command string) {
 
 func (m cockpitModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case outfittingMsg:
+		m.applyOutfitting(msg)
+		return m, nil
+	case stationSearchOpenedMsg:
+		m.stationSearchResult(msg)
+		return m, nil
 	case bootMsg:
 		if !m.bootActive {
 			return m, nil
@@ -319,6 +329,8 @@ func (m cockpitModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case backendDoneMsg:
 		if msg.err != nil {
+			m.outfitting.cancelRequest()
+			m.outfitting.Error = "Connection session stopped; restart before searching"
 			if m.work != nil {
 				m.work.cancel()
 			}
@@ -336,7 +348,28 @@ func (m cockpitModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		key := msg.Key()
 		delete(m.held, numpadCode(key))
 	case tea.PasteMsg:
-		if m.page == pageEngineering && m.materialSearching {
+		if m.page == pageNavigation && m.outfitting.Active {
+			text := safeText(msg.Content)
+			if runes := []rune(text); len(runes) > 128 {
+				text = string(runes[:128])
+			}
+			if m.outfitting.editSystem {
+				m.outfitting.Input = text
+				m.outfitting.replaceInput = false
+			} else if m.outfitting.Stage == "modules" {
+				m.outfitting.Filter = text
+				m.outfitting.ModuleOffset = 0
+			} else {
+				m.outfitting.StationFilter = text
+				m.outfitting.StationIndex = 0
+			}
+		} else if m.page == pageEngineering && m.goalEditing {
+			digits := strings.TrimSpace(msg.Content)
+			if len(digits) > 0 && len(digits) <= 6 && strings.Trim(digits, "0123456789") == "" {
+				m.goalDigits, m.goalReplace = []rune(digits), false
+			}
+		} else if m.page == pageEngineering {
+			m.materialSearching = true
 			m.materialFilter = safeText(msg.Content)
 			if runes := []rune(m.materialFilter); len(runes) > 80 {
 				m.materialFilter = string(runes[:80])
@@ -376,6 +409,14 @@ func (m cockpitModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		if m.page == pageEngineering && m.engineeringKey(key) {
 			return m, nil
+		}
+		if m.page == pageNavigation {
+			if handled, cmd := m.outfittingKey(key); handled {
+				return m, cmd
+			}
+			if handled, cmd := m.stationSearchKey(key); handled {
+				return m, cmd
+			}
 		}
 		if m.page == pageHardpoints && m.hardpointKey(key) {
 			return m, nil
@@ -494,12 +535,7 @@ func (m cockpitModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 		if m.opts.mode == "control" && key.Code == 'd' {
-			if m.requests != nil {
-				select {
-				case m.requests <- "disarm":
-				default:
-				}
-			}
+			requestStop(m.requests)
 			return m, nil
 		}
 		if m.mock == nil {
@@ -607,7 +643,7 @@ func runCockpitSession(ctx context.Context, opts cockpitOptions, input io.Reader
 			sessionErr = errors.Join(sessionErr, errors.New("session workers did not stop in time; refusing to start another session"))
 		}
 	}()
-	requests := make(chan string, 4)
+	requests := make(chan controlRequest, 4)
 	m := newCockpit(opts, time.Now())
 	m.work = work
 	if m.journalReader != nil {

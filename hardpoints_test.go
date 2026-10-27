@@ -57,7 +57,7 @@ func TestHardpointsJournalDataAndUnknownFireGroups(t *testing.T) {
 func TestHardpointReferencesPersistAndIsolateShipCommanderAndModule(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "groups.json")
 	m := hardpointTestModel(t, path)
-	requests := make(chan string, 3)
+	requests := make(chan controlRequest, 3)
 	m.requests = requests
 	for _, code := range []rune{'1', tea.KeyRight, '2', tea.KeyRight, '0'} {
 		m = updateCockpit(t, m, tea.KeyPressMsg{Code: code})

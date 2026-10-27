@@ -74,3 +74,21 @@ The new EliteAuxPanel.4.2 preset was installed alongside the original Custom pro
 Launch Start-Live.cmd while Elite is closed: the scanner should show the game waiting. Start Elite and load your commander; the cockpit should open after a recent usable snapshot arrives. Use existing game controls to change gear, scoop, lights, hardpoints and night vision. The matching indicator should change after Elite writes its next snapshot, normally within the app's 500 ms polling interval plus file-read time. Confirm both on and off transitions. Close the game and check that the scanner returns even when Status.json remains. A quiet connected snapshot should instead stay visible with a stale label.
 
 For actual control, follow REAL-GAME-SETUP.md: select EliteAuxPanel under Ship Controls, run Start-Game-Control.cmd, return to the unobstructed cockpit, arm with Ctrl+Alt+F9 and first test lights with Num3. Confirm the cockpit and the app agree; disarm with Ctrl+Alt+F10.
+
+## Usability and focus resume — 25 October 2026
+
+The flight-first page order, numbered terminal console tabs, type-to-search engineering editor, +/- target adjustment and simulation preference isolation are covered by regression tests. Focus tests cover same-session pause/resume without replay, Stop, game/app close, binding/read/stale/backwards-clock failures, PID/window/path/creation-time replacement, and delivery failure. A Windows process-identity test uses the test process only and sends no input.
+
+Co-pit additionally tests guarded UI control requests, Stop replacing a pending click, and its searchable material/quantity form. Native mock checks verified Ship lights changing its green LED, searching Arsenic, saving a target of 20 against 12 owned (8 needed), and the portrait cockpit/bottom navigation. The visual test instance exited with no remaining Co-pit/direct WebView2 children. The Windows lifecycle integration test passed graceful exit, panic, forced termination and partial-registration cleanup. Real-game auto-resume/click delivery has not been exercised; no test sent flight input.
+
+## Station-search shortcut — 25 October 2026
+
+Three additional standard tests validate fixed HTTPS search categories, terminal picker layout/flight-input isolation, and cancellation before browser launch. The picker is checked at 60×20, 80×24, 110×36 and 140×42 in all themes. Search tools are public Inara station, outfitting, commodity, material-trader and component pages; no mission offers or current-stock guarantees are invented. No automated test opens a browser.
+
+## Module warnings, station viewer and screen styling — 25 October 2026
+
+- Terminal `go test ./...` and `go vet ./...` pass. Co-pit `go test -tags desktop ./...` and `go vet -tags desktop ./...` pass. Both Windows executables rebuilt successfully.
+- Module-warning tests cover healthy, damaged and zero-integrity key systems, ordinary modules, missing/out-of-range/NaN/infinite integrity, variant module identifiers, false-positive exclusions, and narrow terminal output. A desktop test verifies structured snapshot isolation, no flight requests, report timestamps and no duplicate module text.
+- A regression verifies class-zero station utility mounts are not displayed as weapons. Existing on-demand station-client and desktop lifecycle tests pass, including cancellation, mode changes, shutdown and rejection of obsolete replies.
+- Headless Edge checked the actual frontend assets with clearly simulated data at 1280x900, 720x1100 and 360x800 in all three themes. Module warning states, unknown values without meters, narrow-screen bounds, safe literal module names, loading labels, and pointer-transparent screen decorations passed. Screenshots were visually inspected. These checks did not launch the native companion, arm controls, send flight input, or verify live in-game damage telemetry.
+- The new module display remains a last-Loadout journal snapshot. Optional scan lines are static and scoped to screen panels. The styling adds no background activity. The previous real EDSM availability check is recorded separately; no additional live request was needed for this styling update.

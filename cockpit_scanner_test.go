@@ -135,8 +135,8 @@ func TestScannerFitsTerminalAndPreservesNavigationAndStop(t *testing.T) {
 			}
 		}
 		m = updateCockpit(t, m, tea.KeyPressMsg{Code: tea.KeyTab})
-		if m.page != 1 || strings.Contains(ansi.Strip(m.View().Content), "SCANNING FOR") {
-			t.Fatal("diagnostics must remain accessible while scanning")
+		if m.page != pageShip || strings.Contains(ansi.Strip(m.View().Content), "SCANNING FOR") {
+			t.Fatal("flight pages must remain accessible while scanning")
 		}
 	}
 }

@@ -12,7 +12,7 @@ import (
 
 func TestFeaturePageShortcutsAndFlightInputIsolation(t *testing.T) {
 	m := newCockpit(cockpitOptions{mode: "control", controls: "numpad"}, testNow)
-	requests := make(chan string, 4)
+	requests := make(chan controlRequest, 4)
 	m.requests = requests
 	for i, code := range []rune{tea.KeyF6, tea.KeyF7, tea.KeyF8, tea.KeyF9, tea.KeyF10} {
 		m = updateCockpit(t, m, tea.KeyPressMsg{Code: code})
@@ -29,13 +29,13 @@ func TestFeaturePageShortcutsAndFlightInputIsolation(t *testing.T) {
 		t.Fatal("Esc must return to cockpit")
 	}
 	m = updateCockpit(t, m, tea.KeyPressMsg{Code: tea.KeyTab, Mod: tea.ModShift})
-	if m.page != pageHardpoints {
+	if m.page != pageHelp {
 		t.Fatal("reverse Tab must reach last page")
 	}
 	for i := 0; i < pageCount; i++ {
 		m = updateCockpit(t, m, tea.KeyPressMsg{Code: tea.KeyTab})
 	}
-	if m.page != pageHardpoints {
+	if m.page != pageHelp {
 		t.Fatal("Tab cycle does not include every page")
 	}
 }
@@ -99,7 +99,8 @@ func TestEngineeringSearchTargetSaveProgressAndUnpin(t *testing.T) {
 		t.Fatal(err)
 	}
 	settingsBefore, _ := os.ReadFile(settingsPath)
-	m := newCockpit(cockpitOptions{mode: "mock", controls: "numpad", settings: settingsPath, goals: goalsPath}, testNow)
+	m := newCockpit(cockpitOptions{mode: "live", controls: "commands", settings: settingsPath, goals: goalsPath}, testNow)
+	m.companion = mockCompanionData(testNow)
 	m = updateCockpit(t, m, tea.KeyPressMsg{Code: tea.KeyF9})
 	m = updateCockpit(t, m, tea.KeyPressMsg{Code: '/'})
 	m = updateCockpit(t, m, tea.PasteMsg{Content: "arsenic"})
@@ -107,7 +108,6 @@ func TestEngineeringSearchTargetSaveProgressAndUnpin(t *testing.T) {
 	if rows := m.materialRows(); len(rows) != 1 || rows[0].Name != "arsenic" {
 		t.Fatal("material search did not find selected symbol")
 	}
-	m = updateCockpit(t, m, tea.KeyPressMsg{Code: tea.KeyEnter})
 	m = updateCockpit(t, m, tea.KeyPressMsg{Code: '2', Text: "20"})
 	m = updateCockpit(t, m, tea.KeyPressMsg{Code: tea.KeyEnter})
 	if m.goalEditing || m.goals["raw/arsenic"] != 20 || !strings.Contains(ansi.Strip(m.engineeringPage(80)), "12 / 20 / 8") {

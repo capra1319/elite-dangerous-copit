@@ -57,26 +57,26 @@ func TestNumpadPageNavigationUsesPhysicalKeysAndPreservesFlightKeys(t *testing.T
 	}
 	key := tea.KeyPressMsg{Code: '+', BaseCode: tea.KeyKpPlus, Text: "+"}
 	m = updateCockpit(t, m, key)
-	if m.page != pageDiagnostics || m.mock.State.has(gear) {
+	if m.page != pageShip || m.mock.State.has(gear) {
 		t.Fatal("physical Num+ failed to navigate independently")
 	}
 	m = updateCockpit(t, m, key)
-	if m.page != pageDiagnostics {
+	if m.page != pageShip {
 		t.Fatal("held page key repeated")
 	}
 	m = updateCockpit(t, m, tea.KeyReleaseMsg{Code: '+', BaseCode: tea.KeyKpPlus})
 	m = updateCockpit(t, m, key)
-	if m.page != pageHelp {
+	if m.page != pageNavigation {
 		t.Fatal("released/repressed page key did not navigate")
 	}
 	m = updateCockpit(t, m, tea.KeyPressMsg{Code: tea.KeyKpMinus})
-	if m.page != pageDiagnostics {
+	if m.page != pageShip {
 		t.Fatal("Num- did not navigate backwards")
 	}
 	for _, mode := range []string{"live", "mock"} {
 		model := newCockpit(cockpitOptions{mode: mode}, testNow)
 		model = updateCockpit(t, model, tea.KeyPressMsg{Code: '-', BaseCode: tea.KeyKpMinus, Text: "-"})
-		if model.page != pageHardpoints {
+		if model.page != pageHelp {
 			t.Fatal("physical Num- did not wrap backwards")
 		}
 	}
@@ -86,7 +86,7 @@ func TestNumpadPageNavigationUsesPhysicalKeysAndPreservesFlightKeys(t *testing.T
 		t.Fatal("control-mode page key must wait for its global hotkey message to avoid duplicate navigation")
 	}
 	control = updateCockpit(t, control, pageStepMsg(1))
-	if control.page != pageDiagnostics {
+	if control.page != pageShip {
 		t.Fatal("global page message was not applied")
 	}
 	control.frame.PageStatus = "Global page keys unavailable"
@@ -108,13 +108,13 @@ func TestGlobalPageDispatcherIsViewOnlyAndCancelsUnsavedEdits(t *testing.T) {
 	m := newCockpit(cockpitOptions{mode: "control"}, testNow)
 	m.page, m.themeChoice, m.savedTheme = pageSettings, 1, 0
 	m = updateCockpit(t, m, pageStepMsg(1))
-	if m.page != pageShip || m.themeChoice != 0 {
+	if m.page != pageDiagnostics || m.themeChoice != 0 {
 		t.Fatal("global page change did not cancel appearance preview")
 	}
 	m.page, m.goalEditing, m.materialSearching = pageEngineering, true, true
 	m.goals["raw/arsenic"] = 20
 	m = updateCockpit(t, m, pageStepMsg(1))
-	if m.page != pageHardpoints || m.goalEditing || m.materialSearching || m.goals["raw/arsenic"] != 20 {
+	if m.page != pageSettings || m.goalEditing || m.materialSearching || m.goals["raw/arsenic"] != 20 {
 		t.Fatal("page change wrote or retained an unfinished editor")
 	}
 }

@@ -173,11 +173,16 @@ func (m *cockpitModel) saveTarget(key string, target int) {
 	} else {
 		targets[key] = target
 	}
-	if err := saveMaterialGoals(m.opts.goals, targets); err != nil {
-		m.goalMessage = "Could not save target: " + err.Error()
-		return
+	if m.opts.mode != "mock" {
+		if err := saveMaterialGoals(m.opts.goals, targets); err != nil {
+			m.goalMessage = "Could not save target: " + err.Error()
+			return
+		}
 	}
 	m.goals, m.goalMessage = targets, "Material targets saved"
+	if m.opts.mode == "mock" {
+		m.goalMessage = "Simulator target updated (not saved)"
+	}
 	for i, row := range m.materialRows() {
 		if row.Key == key {
 			m.materialIndex = i
@@ -187,6 +192,9 @@ func (m *cockpitModel) saveTarget(key string, target int) {
 }
 
 func (m *cockpitModel) engineeringKey(key tea.Key) bool {
+	if key.Code == tea.KeyTab || key.Code == tea.KeyF1 || key.Code == tea.KeyF4 || key.Code >= tea.KeyF5 && key.Code <= tea.KeyF10 {
+		return false
+	}
 	if key.Code == 'c' && key.Mod&tea.ModCtrl != 0 {
 		return false
 	}
@@ -225,24 +233,6 @@ func (m *cockpitModel) engineeringKey(key tea.Key) bool {
 		}
 		return true
 	}
-	if m.materialSearching {
-		switch key.Code {
-		case tea.KeyEscape:
-			m.materialFilter, m.materialSearching = "", false
-		case tea.KeyEnter, tea.KeyKpEnter:
-			m.materialSearching = false
-		case tea.KeyBackspace:
-			if runes := []rune(m.materialFilter); len(runes) > 0 {
-				m.materialFilter = string(runes[:len(runes)-1])
-			}
-		default:
-			if key.Mod&(tea.ModCtrl|tea.ModAlt|tea.ModSuper) == 0 && len(m.materialFilter) < 80 {
-				m.materialFilter += safeText(key.Text)
-			}
-		}
-		m.materialIndex = 0
-		return true
-	}
 	rows := m.materialRows()
 	m.materialIndex = min(max(0, m.materialIndex), max(0, len(rows)-1))
 	switch key.Code {
@@ -259,12 +249,25 @@ func (m *cockpitModel) engineeringKey(key tea.Key) bool {
 	case '/':
 		m.materialSearching, m.materialFilter, m.materialIndex = true, "", 0
 		return true
-	case 'p':
+	case tea.KeyF2:
 		m.onlyPinned, m.materialIndex = !m.onlyPinned, 0
+		return true
+	case tea.KeyEscape:
+		if m.materialFilter != "" || m.materialSearching {
+			m.materialFilter, m.materialSearching, m.materialIndex = "", false, 0
+			return true
+		}
+		return false
+	case tea.KeyBackspace:
+		if runes := []rune(m.materialFilter); len(runes) > 0 {
+			m.materialFilter = string(runes[:len(runes)-1])
+		}
+		m.materialSearching, m.materialIndex = m.materialFilter != "", 0
 		return true
 	case tea.KeyEnter, tea.KeyKpEnter:
 		if len(rows) > 0 {
 			row := rows[m.materialIndex]
+			m.materialSearching = false
 			m.goalEditing, m.goalReplace, m.goalKey = true, true, row.Key
 			target := row.Target
 			if target == 0 {
@@ -277,6 +280,26 @@ func (m *cockpitModel) engineeringKey(key tea.Key) bool {
 		if len(rows) > 0 {
 			m.saveTarget(rows[m.materialIndex].Key, 0)
 		}
+		return true
+	case '+', '-':
+		if len(rows) > 0 {
+			row := rows[m.materialIndex]
+			target := row.Target + 1
+			if key.Code == '-' {
+				target = max(0, row.Target-1)
+			}
+			if target <= 999999 {
+				m.saveTarget(row.Key, target)
+			}
+		}
+		return true
+	}
+	if key.Mod&(tea.ModCtrl|tea.ModAlt|tea.ModSuper) == 0 && key.Text != "" {
+		m.materialFilter += safeText(key.Text)
+		if runes := []rune(m.materialFilter); len(runes) > 80 {
+			m.materialFilter = string(runes[:80])
+		}
+		m.materialSearching, m.materialIndex = true, 0
 		return true
 	}
 	return false
