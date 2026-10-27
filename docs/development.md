@@ -18,7 +18,12 @@ git pull --ff-only
 
 The script invokes the pinned Wails CLI and creates `build/bin/Co-pit.exe`,
 with configuration, the binding preset and licence files in `build/bin`.
-Launch with `Start-Co-pit.cmd` from the repository root. The app embeds its
+Launch by double-clicking `Launch Co-pit.cmd` in the repository root.
+`Start-Co-pit.cmd` is a compatibility alias for the same launcher. If the
+EXE is absent, the launcher checks for Go and offers a first build; it shows
+build failures instead of silently closing. It launches the app with
+`build/bin` as its working directory and then exits. Existing builds open
+without rebuilding. The app embeds its
 frontend assets; changes to HTML, CSS or JavaScript require rebuilding the EXE.
 Microsoft WebView2 Runtime is required to run the desktop app.
 

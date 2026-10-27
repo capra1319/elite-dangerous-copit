@@ -1,2 +1,3 @@
 @echo off
-"%~dp0build\bin\Co-pit.exe"
+call "%~dp0Launch Co-pit.cmd"
+exit /b %errorlevel%

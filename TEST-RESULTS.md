@@ -1,5 +1,11 @@
 # Test verification
 
+## Overview, screenshots and root launcher — 27 October 2026
+
+The README is an overview with current simulated Cockpit, Ship and Engineering screenshots; the detailed reference moved to docs/user-guide.md. All changed documentation links and screenshot targets were checked. Current screenshot capture used the embedded frontend with isolated fixtures, blocked external requests and no game-input calls; the landscape images were visually inspected. A portrait Ship image is included in the user guide.
+
+The production Wails build completed in the main checkout. Launch Co-pit.cmd opens the built EXE with build/bin as its working directory and exits; Start-Co-pit.cmd delegates to it. Isolated temporary-folder checks using a harmless local stub passed normal launch, spaces and ampersands in the folder path, the compatibility alias, declining the first-build prompt, missing-Go guidance and visible build-failure reporting. These checks did not launch the game companion or send game input. No backend or frontend behavior changed.
+
 ## Current merged baseline — 27 October 2026
 
 Both applications and the final Balanced sizing update are available on `main`; merge commit 38a67b7 includes the terminal and Wails histories. After resolving the merge, `go test ./...`, `go test -tags desktop ./...` and `go vet -tags desktop ./...` passed. Both worktrees were clean before this documentation update.

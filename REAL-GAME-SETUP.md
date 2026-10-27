@@ -8,7 +8,7 @@ Co-pit desktop and Elite Aux terminal are both built from `main` and share the s
 2. Run **Install-Preset.cmd**. This adds **EliteAuxPanel.4.2.binds** to Elite's bindings folder. If it has already been installed unchanged, the installer does nothing. It refuses to replace a different existing EliteAuxPanel preset.
 3. Restart Elite if it was already open so it can discover the new preset.
 4. In **Options > Controls > Ship Controls**, choose **EliteAuxPanel** in the preset list and apply it. Leave the general, SRV and on-foot preset selections as they are.
-5. Open **build/bin/Co-pit.exe** or **Start-Co-pit.cmd** for desktop, or **eliteaux.exe** / **Start.cmd** for terminal (the existing **Start-Game-Control.cmd** also works). The app immediately scans for Elite and connects when your commander session is ready. Return to your ship's cockpit and close the internal/external panels, chat and maps.
+5. Double-click **Launch Co-pit.cmd** in the root folder for desktop, or **eliteaux.exe** / **Start.cmd** for terminal (the existing **Start-Game-Control.cmd** also works). The app immediately scans for Elite and connects when your commander session is ready. Return to your ship's cockpit and close the internal/external panels, chat and maps.
 6. Turn **Num Lock on**. With Elite focused, press **Ctrl+Alt+F9** to arm. The panel on monitor two will say **ARMED**.
 7. First try **Num3** to toggle lights. The lamp changes only after the game writes the matching state. Press Num3 again to turn them back off.
 
