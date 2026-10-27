@@ -27,7 +27,7 @@ coverage.*
 .env.*
 !.env.example
 /build/bin/
-/frontend/wailsjs/
+/app/frontend/wailsjs/
 *.syso
 
 /cockpit-layout.json

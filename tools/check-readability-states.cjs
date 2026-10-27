@@ -4,7 +4,7 @@ fs.mkdirSync(path.join(process.env.COPIT_VISUAL_OUTPUT || path.join(root,'tmp','
 (async()=>{const browser=await chromium.launch({headless:true,channel:'msedge'});try{
 const page=await browser.newPage({viewport:{width:1920,height:1080}}),errors=[],requests=[];page.on('pageerror',e=>errors.push(e.message));await page.route(/^https?:/,r=>{requests.push(r.request().url());return r.abort()});
 await page.addInitScript(fixtures=>{window.fixtures=fixtures;window.outfitBaseline=structuredClone(fixtures[9].Outfitting);window.current=0;window.prefs={...fixtures[0].Preferences,uiScale:100,scanlines:true};window.go={main:{DesktopApp:{GetState:async()=>({...structuredClone(window.fixtures[window.current]),Preferences:window.prefs}),SelectPage:async p=>window.current=p,SavePreferences:async p=>window.prefs=p,ShowOutfitting:async()=>{},Disarm:async()=>{}}}}},JSON.parse(fs.readFileSync((process.env.COPIT_FRONTEND_FIXTURE || path.join(require('os').tmpdir(),'copit-readability-fixtures.json')),'utf8')));
-await page.goto(pathToFileURL(root+'/frontend/index.html').href);await page.locator('.cockpit-switch').last().waitFor();
+await page.goto(pathToFileURL(root+'/app/frontend/index.html').href);await page.locator('.cockpit-switch').last().waitFor();
 for(const size of [{width:1920,height:1080},{width:1440,height:2560},{width:1280,height:720},{width:960,height:1707},{width:800,height:650}])for(const scale of [100,150,200]){
  await page.setViewportSize(size);
  for(const stage of ['populated','loading','error','empty']){

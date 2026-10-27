@@ -23,7 +23,7 @@ It opens the desktop app from `build/bin`. If the app has not been built in
 that folder, it offers to build it first. Source builds need **Go 1.26+** and
 internet access for dependencies; running the desktop app needs **Microsoft
 WebView2 Runtime**. Run one companion at a time. Set up the game controls
-using the [setup guide](REAL-GAME-SETUP.md).
+using the [setup guide](docs/game-setup.md).
 
 ## More of the app
 
@@ -36,14 +36,14 @@ Screenshots show the current frontend with clearly simulated data.
 ## Documentation
 
 - [User guide and screenshots](docs/user-guide.md)
-- [Game setup and controls](REAL-GAME-SETUP.md)
+- [Game setup and controls](docs/game-setup.md)
 - [Build, development and verification](docs/development.md)
 - [Display sizing and supported layouts](docs/visual-readability-implementation.md)
-- [Safety review](SAFETY-REVIEW.md) · [Test evidence](TEST-RESULTS.md)
+- [Safety review](docs/safety-review.md) · [Test evidence](docs/test-results.md)
 
 ## License
 
 Copyright © 2026 CapraarpaC. Noncommercial reuse with attribution is allowed
 under the [Co-pit Noncommercial License](LICENSE). Monetized versions require
 a [separate commercial agreement](COMMERCIAL.md). Third-party code retains
-its [own licences](licenses/).
+its [own licences](licenses).

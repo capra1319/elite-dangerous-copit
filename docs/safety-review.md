@@ -48,7 +48,7 @@ Desktop checks can be repeated with the controller closed:
 ```powershell
 $env:ELITEAUX_LIFECYCLE_TEST = '1'
 $env:ELITEAUX_PAGE_KEYS_TEST = '1'
-go test -run '^(TestWindowsControlCleanupAfterExitPanicAndForcedTermination|TestControlGlobalNumpadPageKeys)$' -v .
+go test -run '^(TestWindowsControlCleanupAfterExitPanicAndForcedTermination|TestControlGlobalNumpadPageKeys)$' -v ./app
 ```
 
 ## Remaining limits

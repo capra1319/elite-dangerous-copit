@@ -14,7 +14,7 @@ const profiles=[{id:'1080',width:1920,height:1080,dpr:1},{id:'1080-125',width:15
    SetFireGroupReference:async(key,group,trigger)=>{window.fixtures[8].PageView.Hardpoints.find(row=>row.Key===key).Groups[group]=trigger;window.referenceWrites.push({key,group,trigger})}
   }}};
  },JSON.parse(fs.readFileSync((process.env.COPIT_FRONTEND_FIXTURE || path.join(require('os').tmpdir(),'copit-readability-fixtures.json')),'utf8')));
- await page.goto(pathToFileURL(root+'/frontend/index.html').href);await page.locator('.cockpit-switch').last().waitFor();
+ await page.goto(pathToFileURL(root+'/app/frontend/index.html').href);await page.locator('.cockpit-switch').last().waitFor();
  for(const profile of profiles){await page.setViewportSize({width:profile.width,height:profile.height});
   for(const scale of [100,125,150,175,200])for(const theme of ['command-deck','flight-console','retro-ops'])for(const id of [0,4,5,6,8,7,3,1,2]){
    await page.evaluate(async({id,scale,theme})=>{window.currentPage=id;window.prefs.uiScale=scale;window.prefs.theme=theme;await refresh();document.getElementById('main').scrollTop=0},{id,scale,theme});

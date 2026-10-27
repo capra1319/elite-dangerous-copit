@@ -50,7 +50,7 @@ request a way to discuss licensing; it is not itself a commercial agreement.
 
 ## Dependencies, contributions and review
 
-Existing notices in [licenses/](licenses/) remain applicable. The project
+Existing notices in [licenses/](licenses) remain applicable. The project
 license does not make CapraarpaC the owner of third-party code or give the
 maintainer authority to offer commercial exceptions for someone else's work.
 Contributors retain rights in their original work; a pull request alone does

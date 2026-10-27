@@ -1,4 +1,0 @@
-@echo off
-set "ELITEAUX_PACKAGE=%~dp0"
-powershell -NoProfile -Command "$ErrorActionPreference='Stop'; $source=Join-Path $env:ELITEAUX_PACKAGE 'EliteAuxPanel.4.2.binds'; $folder=Join-Path $env:LOCALAPPDATA 'Frontier Developments\Elite Dangerous\Options\Bindings'; $target=Join-Path $folder 'EliteAuxPanel.4.2.binds'; if (-not (Test-Path -LiteralPath $folder)) { throw 'Elite Dangerous bindings folder not found. Run the game and save your controls first.' }; if (Test-Path -LiteralPath $target) { if ((Get-FileHash -LiteralPath $source).Hash -ne (Get-FileHash -LiteralPath $target).Hash) { throw 'EliteAuxPanel preset already exists and differs. No file was overwritten.' } } else { Copy-Item -LiteralPath $source -Destination $target }; Write-Host 'Preset installed. Restart Elite, then select EliteAuxPanel in Options - Controls - Ship Controls.'"
-pause

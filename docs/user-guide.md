@@ -11,7 +11,7 @@ the [Co-pit Noncommercial License 1.0](../LICENSE). Monetizing Co-pit or a fork
 requires a separate written commercial agreement, even when its source is
 public. No royalty rate is automatically granted or assumed. See
 [commercial licensing](../COMMERCIAL.md). Existing third-party notices in
-[licenses/](../licenses/) retain their own terms.
+[licenses/](../licenses) retain their own terms.
 
 
 ## Current screenshots
@@ -34,7 +34,7 @@ These screenshots use simulated data in the current frontend.
 ## Get started
 
 Build from `main`, then double-click **Launch Co-pit.cmd** or **build/bin/Co-pit.exe** for
-the desktop app. Open **eliteaux.exe** or **Start.cmd** for the terminal app.
+the desktop app. Open **build/bin/eliteaux.exe** or **tools/launchers/Start.cmd** for the terminal app.
 Run one companion at a time so they do not compete for the global shortcuts.
 Normal startup searches for Elite Dangerous immediately and starts disarmed.
 Mock mode is an explicit opt-in.
@@ -45,7 +45,7 @@ Keep the packaged configuration and binding files alongside the executable.
 Local telemetry works offline; station outfitting lookups use the internet
 only when requested.
 
-For controls and the binding preset, follow [game setup](../REAL-GAME-SETUP.md).
+For controls and the binding preset, follow [game setup](game-setup.md).
 For source builds and checks, see [development](development.md).
 
 ## Desktop features
@@ -65,7 +65,7 @@ For source builds and checks, see [development](development.md).
 From the repository root on Windows with Go 1.26+:
 
 ```powershell
-.\Build-Co-pit.ps1
+.\tools\Build-Co-pit.ps1
 ```
 
 The script builds with the `desktop` tag and packages the control configuration, prepared binding preset and licences. It downloads pinned dependencies on first use. `go test -tags desktop ./...` checks the desktop bridge and shared core; `go test ./...` checks the terminal entry point.
@@ -76,11 +76,11 @@ Co-pit-readability.exe or Co-pit-next.exe are superseded test builds.
 
 ## Documentation
 
-- [Real-game setup and controls](../REAL-GAME-SETUP.md)
+- [Real-game setup and controls](game-setup.md)
 - [Development, both builds and verification](development.md)
 - [Current sizing, responsive layouts and display checks](visual-readability-implementation.md)
-- [Shutdown and input safety review](../SAFETY-REVIEW.md)
-- [Test evidence and remaining manual checks](../TEST-RESULTS.md)
+- [Shutdown and input safety review](safety-review.md)
+- [Test evidence and remaining manual checks](test-results.md)
 - [Commercial licensing](../COMMERCIAL.md)
 
 ---
@@ -89,26 +89,26 @@ Co-pit-readability.exe or Co-pit-next.exe are superseded test builds.
 
 A Go companion panel for Elite Dangerous, built with **Bubble Tea v2** and **Lip Gloss v2**. Controls are grouped into Flight & Utility, Visibility, Combat and Navigation. Gear, cargo scoop, ship lights, hardpoints and night vision report **ACTIVE / INACTIVE** from telemetry. Ship condition, power distribution, fuel, flight warnings and activity history complete the second-monitor display. The original hardware mapping remains gear L1, scoop L2, lights L3 and hardpoints L4.
 
-![Cockpit preview — simulated data](../cockpit-preview.png)
+![Cockpit preview — simulated data](screenshots/terminal/cockpit-preview.png)
 
 ## Open the app
 
-Open **eliteaux.exe** or **Start.cmd**. The app immediately searches for the running Elite Dangerous process and local telemetry, then opens the cockpit when your commander session is ready. If the game is closed, it keeps scanning and connects when you launch it. Real-game numpad controls are available and start **disarmed**; focus Elite and press **Ctrl+Alt+F9** to arm after setup.
+Open **build/bin/eliteaux.exe** or **tools/launchers/Start.cmd**. The app immediately searches for the running Elite Dangerous process and local telemetry, then opens the cockpit when your commander session is ready. If the game is closed, it keeps scanning and connects when you launch it. Real-game numpad controls are available and start **disarmed**; focus Elite and press **Ctrl+Alt+F9** to arm after setup.
 
-On launch, a brief **800 ms terminal boot animation** sweeps across an original ASCII eagle medal in your selected theme. Spread feathered wings frame a central shield and the Elite Aux caption. Full, compact and miniature artwork adapt to the available terminal space; the source is in `data/eagle-medal*.txt`. Game detection and telemetry reads start immediately in the background. Any key skips the animation; navigation and Quit still work. It runs once per launch, does not replay when toggling mock mode, and gives way immediately if the backend reports arming or a startup error. Use `eliteaux.exe -boot=false` to skip it entirely. Classic/plain/one-shot output stays unchanged.
+On launch, a brief **800 ms terminal boot animation** sweeps across an original ASCII eagle medal in your selected theme. Spread feathered wings frame a central shield and the Elite Aux caption. Full, compact and miniature artwork adapt to the available terminal space; the source is in `app/data/eagle-medal*.txt`. Game detection and telemetry reads start immediately in the background. Any key skips the animation; navigation and Quit still work. It runs once per launch, does not replay when toggling mock mode, and gives way immediately if the backend reports arming or a startup error. Use `eliteaux.exe -boot=false` to skip it entirely. Classic/plain/one-shot output stays unchanged.
 
 A full-width status strip stays visible on every page: **CONNECTED | DISARMED** uses amber with bright connection borders, while **>>> CONNECTED | ARMED <<<** uses green with green panel borders and a **GAME CONTROLS ACTIVE** label on wider terminals. The window title also follows the state. Searching, setup problems, lost/stale telemetry and mock mode have separate labels; the active green treatment requires current telemetry and the backend's armed acknowledgement. Text labels keep the states distinct without colour.
 
-Shutdown behavior, the safety review, test evidence and abrupt-termination limits are documented in [SAFETY-REVIEW.md](../SAFETY-REVIEW.md). The app does not start background services or child processes; application launchers return when it exits.
+Shutdown behavior, the safety review, test evidence and abrupt-termination limits are documented in [safety review](safety-review.md). The app does not start background services or child processes; application launchers return when it exits.
 
 Mock mode is **off on every normal launch**. With the app focused, press **F4** to toggle it on for testing, then **F4** again to return to the real game. Entering mock mode stops the real backend and releases its hotkeys. Returning discards simulated telemetry and starts a fresh, disarmed scan. The toggle is temporary and never changes the next normal launch.
 
-- **Start-Game-Control.cmd** — same normal startup as opening the EXE.
-- **Start-Live.cmd** — actual ship state without sending input.
-- **Start-Mock.cmd** — explicitly opt into the simulator with typed commands.
-- **Start-Mock-Numpad.cmd** — explicitly opt into the simulator with immediate numpad controls.
+- **tools/launchers/Start-Game-Control.cmd** — same normal startup as opening the EXE.
+- **tools/launchers/Start-Live.cmd** — actual ship state without sending input.
+- **tools/launchers/Start-Mock.cmd** — explicitly opt into the simulator with typed commands.
+- **tools/launchers/Start-Mock-Numpad.cmd** — explicitly opt into the simulator with immediate numpad controls.
 
-The launchers open the new cockpit automatically. Close an already-running app and relaunch it to use an update. The packaged Windows app needs no Go installation, account or network connection to run. For game setup, see [REAL-GAME-SETUP.md](../REAL-GAME-SETUP.md). An already-installed EliteAuxPanel preset works with this visual upgrade.
+The launchers open the new cockpit automatically. Close an already-running app and relaunch it to use an update. The packaged Windows app needs no Go installation, account or network connection to run. For game setup, see [game setup](game-setup.md). An already-installed EliteAuxPanel preset works with this visual upgrade.
 
 ## Navigation
 
@@ -173,7 +173,7 @@ Use **Up/Down** and **PgUp/PgDn** to scroll Ship, Navigation and Missions. Engin
 
 Rows show **owned / target / still needed** and automatically mark a target complete when reported inventory reaches it. Targets are saved to `engineering-goals.json` beside appearance settings (`%APPDATA%\EliteAux` by default). `-goals PATH` selects a separate file. Saving targets does not change game files, bindings or appearance settings. Mock mode uses explicitly simulated journal examples and never reads real journal data.
 
-Journal pages display last-recorded data while disconnected. Mission details outside the 32-file history may be unavailable; live mission progress is shown only when the game reports it. The offline material and ship-name catalogues are attributed in [data/MATERIAL-SOURCE.md](../data/MATERIAL-SOURCE.md); unknown game symbols remain visible.
+Journal pages display last-recorded data while disconnected. Mission details outside the 32-file history may be unavailable; live mission progress is shown only when the game reports it. The offline material and ship-name catalogues are attributed in [material and ship data sources](../app/data/MATERIAL-SOURCE.md); unknown game symbols remain visible.
 
 ### Station search
 
@@ -189,7 +189,7 @@ Sources: [Inara station search](https://inara.cz/elite/nearest-stations/), [outf
 
 Live and real-control modes show a radar sweep and moving activity bar while waiting for Elite Dangerous. Three checks show the game process, the local status file and your commander session. The display opens the cockpit automatically when the game is running and a recent usable snapshot is available. The animation shows activity, not a completion percentage. Mock mode opens immediately without the game.
 
-![Waiting-screen preview](../scanner-preview.gif)
+![Waiting-screen preview](screenshots/terminal/scanner-preview.gif)
 
 Windows process detection runs every 250 ms and works when Elite is in the background. Telemetry is read every 100 ms by default and published to the cockpit immediately after each read, so feedback no longer waits for a one-second redraw. Closing Elite returns to the scanner even if an old Status.json remains. Missing or incomplete files recover automatically. If Windows cannot enumerate processes, Diagnostics explains the failure and the display uses telemetry as a fallback. Process detection never grants permission to send keyboard input; existing focus, preset, arming and telemetry checks still apply.
 
@@ -233,14 +233,14 @@ Fuel is reported main-tank mass, not tank percentage. Power display uses the gam
 ## Command-line options
 
 ```powershell
-.\eliteaux.exe
-.\eliteaux.exe -mode mock
-.\eliteaux.exe -mode mock -controls numpad
-.\eliteaux.exe -mode live
-.\eliteaux.exe -mode control -controls numpad
-.\eliteaux.exe -mode mock -ui classic
-.\eliteaux.exe -mode live -once -plain
-.\eliteaux.exe -help
+.\build\bin\eliteaux.exe
+.\build\bin\eliteaux.exe -mode mock
+.\build\bin\eliteaux.exe -mode mock -controls numpad
+.\build\bin\eliteaux.exe -mode live
+.\build\bin\eliteaux.exe -mode control -controls numpad
+.\build\bin\eliteaux.exe -mode mock -ui classic
+.\build\bin\eliteaux.exe -mode live -once -plain
+.\build\bin\eliteaux.exe -help
 ```
 
 The default mode is `control`, with numpad input selected automatically. `-interval` defaults to `100ms`; larger values reduce polling frequency. Mock always requires F4, an explicit `-mode mock`, or one of the mock launchers. The F4 toggle is available in the cockpit interface. `-ui classic` opens the previous interface. `-plain` and `-once` retain text output for diagnostics/scripts. `-status PATH` selects another Status.json. Separate source checkouts and portable copies do not update automatically; rebuild the executable in the copy you use.
@@ -253,12 +253,12 @@ Source needs **Go 1.26+**. Dependencies are pinned in go.mod/go.sum; the first s
 go mod download
 go test ./...
 go vet ./...
-go build -trimpath -o eliteaux.exe .
+.\tools\Build-EliteAux.ps1
 ```
 
-See [TEST-RESULTS.md](../TEST-RESULTS.md) for verification and outstanding gameplay checks. Hardware remains optional future work. Third-party licences are included in `licenses/`.
+See [test evidence](test-results.md) for verification and outstanding gameplay checks. Hardware remains optional future work. Third-party licences are included in `licenses/`.
 
-See [FEATURE-IDEAS.md](../FEATURE-IDEAS.md) for extra toggle controls, navigation, audio alerts, journal pages and later USB-serial hardware integration.
+See [feature ideas](feature-ideas.md) for extra toggle controls, navigation, audio alerts, journal pages and later USB-serial hardware integration.
 
 References: [Bubble Tea](https://github.com/charmbracelet/bubbletea), [Lip Gloss](https://github.com/charmbracelet/lipgloss), [Frontier Journal Manual](https://hosting.zaonce.net/community/journal/v32/Journal_Manual-v32.pdf).
 

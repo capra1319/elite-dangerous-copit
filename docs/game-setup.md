@@ -1,16 +1,19 @@
 # Connect the panel to Elite Dangerous
 
-Co-pit desktop and Elite Aux terminal are both built from `main` and share the same real-game control backend. They read Elite's local Status.json for feedback and use Windows keyboard input to request actions through Elite's bindings. The journal/status interface supplies telemetry; it is not a writable command endpoint. Run one companion at a time because both use the same global shortcuts. See [source build instructions](docs/development.md) if you are working from a Git checkout.
+Co-pit desktop and Elite Aux terminal are both built from `main` and share the same real-game control backend. They read Elite's local Status.json for feedback and use Windows keyboard input to request actions through Elite's bindings. The journal/status interface supplies telemetry; it is not a writable command endpoint. Run one companion at a time because both use the same global shortcuts. See [source build instructions](development.md) if you are working from a Git checkout.
 
 ## One-time setup
 
 1. Extract the full package into a new folder. Do not run only the EXE from inside the ZIP.
-2. Run **Install-Preset.cmd**. This adds **EliteAuxPanel.4.2.binds** to Elite's bindings folder. If it has already been installed unchanged, the installer does nothing. It refuses to replace a different existing EliteAuxPanel preset.
+2. Run **tools/Install-Preset.cmd**. This adds **EliteAuxPanel.4.2.binds** to Elite's bindings folder. If it has already been installed unchanged, the installer does nothing. It refuses to replace a different existing EliteAuxPanel preset.
 3. Restart Elite if it was already open so it can discover the new preset.
 4. In **Options > Controls > Ship Controls**, choose **EliteAuxPanel** in the preset list and apply it. Leave the general, SRV and on-foot preset selections as they are.
-5. Double-click **Launch Co-pit.cmd** in the root folder for desktop, or **eliteaux.exe** / **Start.cmd** for terminal (the existing **Start-Game-Control.cmd** also works). The app immediately scans for Elite and connects when your commander session is ready. Return to your ship's cockpit and close the internal/external panels, chat and maps.
+5. Double-click **Launch Co-pit.cmd** in the root folder for desktop, or **build/bin/eliteaux.exe** / **tools/launchers/Start.cmd** for terminal (the existing **tools/launchers/Start-Game-Control.cmd** also works). The app immediately scans for Elite and connects when your commander session is ready. Return to your ship's cockpit and close the internal/external panels, chat and maps.
 6. Turn **Num Lock on**. With Elite focused, press **Ctrl+Alt+F9** to arm. The panel on monitor two will say **ARMED**.
 7. First try **Num3** to toggle lights. The lamp changes only after the game writes the matching state. Press Num3 again to turn them back off.
+
+From the source folder, use **tools/Install-Preset.cmd**. A packaged
+`build/bin` folder also includes **Install-Preset.cmd** alongside its preset.
 
 The supplied preset was cloned from this user's Custom.4.2 HOTAS profile. Its primary HOTAS bindings were preserved; only ten previously empty secondary slots were given function-key bindings. Do not use this personalized preset to replace somebody else's controls. The original Custom preset and StartPreset selection files are not overwritten by the installer.
 
@@ -62,10 +65,10 @@ For a nonstandard setup, `-config PATH` selects a JSON config. `bindingsFile` ca
 
 Normal startup uses real-game control and starts disarmed. With the app focused, **F4** explicitly enables mock mode and stops the real-control backend. Press **F4** again to discard simulated state and resume real detection, disarmed. From the read-only launcher, F4 returns to read-only mode. A normal relaunch always starts with mock off.
 
-- **Start-Mock.cmd** — typed simulator commands.
-- **Start-Mock-Numpad.cmd** — focused-terminal numpad simulator.
-- **Start-Live.cmd** — read-only game state viewer.
-- **Start-Game-Control.cmd** — numpad operates the real game after arming.
+- **tools/launchers/Start-Mock.cmd** — typed simulator commands.
+- **tools/launchers/Start-Mock-Numpad.cmd** — focused-terminal numpad simulator.
+- **tools/launchers/Start-Live.cmd** — read-only game state viewer.
+- **tools/launchers/Start-Game-Control.cmd** — numpad operates the real game after arming.
 
 The mock's Enter/F1/Esc shortcuts belong to the simulator. In real-game mode only the listed numpad triggers and modified arm/stop shortcuts are registered.
 

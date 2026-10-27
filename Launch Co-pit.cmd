@@ -16,7 +16,7 @@ if errorlevel 1 goto build
 exit /b 1
 
 :build
-powershell.exe -NoProfile -File "%~dp0Build-Co-pit.ps1"
+powershell.exe -NoProfile -File "%~dp0tools\Build-Co-pit.ps1"
 if errorlevel 1 goto buildfailed
 if not exist "%~dp0build\bin\Co-pit.exe" goto buildfailed
 
