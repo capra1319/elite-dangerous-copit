@@ -1,7 +1,10 @@
 body[data-shield-offline="true"] .shell::after { content:""; position:absolute; inset:0; pointer-events:none; z-index:50; box-shadow:inset 0 0 2.5rem .5rem #ff3344; animation:shield-warning 1.8s ease-in-out infinite alternate; }
 @keyframes shield-warning { from{opacity:.25} to{opacity:.8} }
 #shield-offline-banner { flex-basis:100%; order:1; color:#ffc3c7; background:#54141d; border:1px solid #dc7c89; padding:.5rem 1rem; text-align:center; font-weight:800; letter-spacing:.1em; }
-#cockpit { display:flex; flex-direction:column; gap:.75rem; }
+#cockpit { display:flex; flex-direction:column; gap:1rem; }
+/* Keep helper lines close to their panels; full sections retain a 16px gap. */
+main[data-page="0"] { gap:1rem; }
+#cockpit > .control-hint,#cockpit > .flight-note { margin-block:-.5rem; }
 #ship-health { padding:.5rem 1rem; }
 .health-radar { display:grid; grid-template-columns:minmax(0,12rem) minmax(8rem,16rem) minmax(0,12rem); align-items:center; justify-content:center; gap:1rem; }
 .health-reading { display:flex; flex-direction:column; gap:.25rem; min-width:0; }
@@ -39,7 +42,7 @@ body[data-shield-offline="true"] .shell::after { content:""; position:absolute; 
 .cockpit-route { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:.375rem 1.5rem; align-items:center; }
 .cockpit-route-heading { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
 .cockpit-route-heading h2 { color:var(--muted); font-size:var(--text-small); }
-#cockpit-destination { font-size:1.25rem; overflow-wrap:anywhere; }
+#cockpit-destination { font-size:var(--text-card); overflow-wrap:anywhere; }
 .cockpit-route dl { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
 .cockpit-route dt { color:var(--muted); font-size:var(--text-small); }
 .cockpit-route dd { margin:.125rem 0 0; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }

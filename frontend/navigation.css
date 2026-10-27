@@ -1,7 +1,7 @@
 /* Navigation changes arrangement with available space, never text size. */
 #navigation { display:flex; flex-direction:column; gap:.375rem; }
-#navigation button { display:flex; align-items:center; gap:.75rem; border-color:transparent; background:transparent; text-align:left; font-size:1.125rem; font-weight:600; padding:.625rem .75rem; flex-shrink:0; }
-#navigation .navigation-index { color:var(--muted); font:.875rem var(--terminal-font); }
+#navigation button { display:flex; align-items:center; gap:.75rem; border-color:transparent; background:transparent; text-align:left; font-size:1.125rem; font-weight:600; padding:.5rem .75rem; flex-shrink:0; }
+#navigation .navigation-index { color:var(--muted); font:var(--text-small) var(--terminal-font); }
 #navigation .navigation-label { min-width:0; overflow-wrap:anywhere; }
 #navigation button[aria-current="page"] { color:var(--accent); border-color:var(--line); background:var(--panel-hi); box-shadow:inset 3px 0 var(--accent); }
 .side-label { padding:.25rem .75rem .875rem; }
@@ -10,7 +10,7 @@
 :root:is([data-orientation="portrait"],[data-compact-nav="true"]) .sidebar { grid-column:1; grid-row:4; border-right:0; border-top:1px solid var(--line); padding:.5rem .75rem; max-height:30dvh; }
 :root:is([data-orientation="portrait"],[data-compact-nav="true"]) .side-label,:root:is([data-orientation="portrait"],[data-compact-nav="true"]) .side-footer { display:none; }
 :root:is([data-orientation="portrait"],[data-compact-nav="true"]) #navigation { display:grid; grid-template-columns:repeat(var(--nav-columns,5),minmax(0,1fr)); gap:.25rem; }
-:root:is([data-orientation="portrait"],[data-compact-nav="true"]) #navigation button { justify-content:center; text-align:center; font-size:1.125rem; padding:.625rem .25rem; }
+:root:is([data-orientation="portrait"],[data-compact-nav="true"]) #navigation button { justify-content:center; text-align:center; font-size:1.125rem; padding:.5rem .25rem; }
 :root:is([data-orientation="portrait"],[data-compact-nav="true"]) #navigation .navigation-index { display:none; }
 :root:is([data-orientation="portrait"],[data-compact-nav="true"]) #navigation button[aria-current="page"] { box-shadow:inset 0 -3px var(--accent); }
 :root:is([data-orientation="portrait"],[data-compact-nav="true"]) main { grid-column:1; grid-row:3; }

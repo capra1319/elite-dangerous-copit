@@ -6,7 +6,7 @@ The existing Co-pit design was committed on wails-conversion before this branch 
 
 ## Result
 
-- Shared typography: 16 px body/data/input text, 14 px secondary text, 18 px navigation, 20 px equipment names, 30 px page/health headings at 100% interface size. Numeric readings use tabular figures. The same rem-based scale sizes spacing, buttons, icons, inputs and navigation, without multiplying Windows DPI.
+- Shared typography: 18 px body/data/input text, 16 px secondary text, 18 px navigation, 22 px equipment names, 26 px page headings and 30 px health readings at 100% interface size. Numeric readings use tabular figures. The same rem-based scale sizes spacing, buttons, icons, inputs and navigation, without multiplying Windows DPI.
 - Settings > Display > Interface size saves 100%, 125%, 150%, 175% or 200%, with a live preview and Reset size button. Missing legacy values default to 100%. Invalid values and saves during shutdown are rejected. Fullscreen stays session-only.
 - The default 1920x1080 Cockpit displays health, both control banks and the bottom destination summary without page scrolling. Wide screens arrange the two banks side by side; narrower layouts stack them. Square lenses remain 112 px at standard size and scale with the interface. Their fitting calculation reads rendered dimensions rather than a separate hardcoded pixel assumption.
 - Shield/hull readings are grouped around the radar graphic. Real shields show UP, with the percentage limitation in the source note; a confirmed shields-down report still uses 0% and the existing warning. Unknown and stale states retain their prior backend semantics.
@@ -41,7 +41,7 @@ With no explicit fixture path, the browser tools read copit-readability-fixtures
 
 ## User test build
 
-The new production binary is build/bin/Co-pit-readability.exe. The prior build/bin/Co-pit.exe remains available. Close any existing Co-pit copy before opening the test build so only one copy owns global shortcuts.
+The current production binary is build/bin/Co-pit.exe. The older build/bin/Co-pit-readability.exe is the initial readability test build and does not contain the latest sizing adjustments. Close any existing Co-pit copy before opening the current build so only one copy owns global shortcuts.
 
 Suggested checks:
 
@@ -51,3 +51,11 @@ Suggested checks:
 4. Edit a quantity and comment, click away, navigate back and confirm drafts remain; save them deliberately. Confirm pins and comment ellipses behave as before.
 5. Open/close the outfitting viewer and control picker; check filters, long names and keyboard focus.
 6. Confirm the manual fire-group reference opens explicitly and remains open after saving. Check native text appearance at your actual Windows display scale.
+
+## Balanced sizing follow-up
+
+Checkpoint commit: 95fc076, recorded before the sizing changes. The selected Balanced preview uses 18 px body text, 16 px supporting labels, 22 px equipment names, and consistent 20 px bold cockpit control names and keys at 100% interface size. The root scale stays at 16 px so square buttons remain 112 px and UI scaling continues to work normally.
+
+Panels use 12 px internal padding; table and material rows use 8 px vertical padding while controls keep their minimum hit areas. General section grids retain 24 px gaps, and the dense Cockpit keeps 16 px between panels with helper lines closer to their associated content. The existing theme, borders, glass controls and scan lines are retained. No new section banners were introduced. Two-line control labels reserve equal height so the lenses align.
+
+Both existing browser checks pass after this change, including 1,080 page/theme/scale/profile combinations, default 1080p destination visibility, portrait layouts, outfitting states, control picker and Engineering editor access. Screenshots of the 1080p Cockpit and portrait Ship page were inspected. The changes are limited to frontend CSS; game input, arming, process ownership and backend persistence are unchanged.
