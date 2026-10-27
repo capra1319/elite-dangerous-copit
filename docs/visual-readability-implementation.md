@@ -1,8 +1,8 @@
 # Visual readability implementation
 
-26 October 2026 · Branch: visual-readability · Baseline: fc44b06
+Updated 27 October 2026 · Available on `main` · Design baseline: fc44b06
 
-The existing Co-pit design was committed on wails-conversion before this branch was created. The implementation applies the visual review plan across the Wails frontend. The terminal checkout at C:/dev/Elite-Dangerous-Controller was not modified.
+The readability work and Balanced sizing are merged into `main` with the terminal companion updates. Merge commit 38a67b7 preserves the combined history. The former `wails-conversion` and `visual-readability` development branches have been retired; use `main` for both applications. The original review remains in [the design plan](visual-readability-plan.md), while this document describes the current implementation.
 
 ## Result
 

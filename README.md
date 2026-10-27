@@ -1,4 +1,9 @@
-# Co-pit — Wails desktop worktree
+# Co-pit — Elite Dangerous companion
+
+Co-pit is a Windows cockpit companion with a Wails desktop interface and an
+Elite Aux terminal interface. Both apps share the local telemetry reader and
+guarded game controls. All completed work is available on **`main`**, including
+the readability update and Balanced text sizing.
 
 **License: source-available, noncommercial reuse.** Copyright (c) 2026 CapraarpaC.
 You may use, modify and share noncommercial versions with attribution under
@@ -9,7 +14,24 @@ public. No royalty rate is automatically granted or assumed. See
 [licenses/](licenses/) retain their own terms.
 
 
-Open **Start-Co-pit.cmd** or **build/bin/Co-pit.exe** after building.
+## Get started
+
+Build from `main`, then open **Start-Co-pit.cmd** or **build/bin/Co-pit.exe** for
+the desktop app. Open **eliteaux.exe** or **Start.cmd** for the terminal app.
+Run one companion at a time so they do not compete for the global shortcuts.
+Normal startup searches for Elite Dangerous immediately and starts disarmed.
+Mock mode is an explicit opt-in.
+
+The desktop app requires Microsoft WebView2 Runtime. Source builds require
+Go 1.26+; packaged apps do not require Go or a separate frontend server.
+Keep the packaged configuration and binding files alongside the executable.
+Local telemetry works offline; station outfitting lookups use the internet
+only when requested.
+
+For controls and the binding preset, follow [game setup](REAL-GAME-SETUP.md).
+For source builds and checks, see [development](docs/development.md).
+
+## Desktop features
 
 - Pages in both apps: **Cockpit → Ship → Navigation → Missions → Hardpoints → Engineering → Settings → Diagnostics → Help**. Existing F-key shortcuts stay the same. In Co-pit use the page buttons, Ctrl+Tab / Ctrl+Shift+Tab, or Num+/Num−. The terminal uses Tab/Shift+Tab and numbered console tabs.
 - The graphical cockpit uses Bold Lens glass controls, large icons and component names above the buttons. The eight built-in controls are always present. The + button opens a ship-aware checklist for optional utilities; toggles and activatable buttons have separate groups. Settings can automatically add supported utilities from the reported ship. Key labels are on the glass; etched brackets and technical stencils match the sci-fi screen panels. Arm manually in Elite once with **Ctrl+Alt+F9**. A button click returns focus to that same game session and uses the guarded input backend. Toggle glass illumination follows game feedback; clicking does not invent an active state. Small LEDs and visible ON/OFF labels are removed. Unknown state remains explicitly marked, and momentary controls are marked ACTION. STOP stays visible on every page and cancels arming and automatic focus resume.
@@ -17,10 +39,13 @@ Open **Start-Co-pit.cmd** or **build/bin/Co-pit.exe** after building.
 - Engineering uses a visible search box, material list, quantity field, **Save target**, and **Remove target**. Inventory that has not been reported remains `?`. Select a material to open its details; close the panel to return to the full-width list. Pin icons and the Pinned materials filter work independently of target quantities. The main list includes a single-line saved Comment column, with overflow shown as an ellipsis. Co-pit provides **Your comments** for every material: enter your own blueprint references, uses or reminders and press **Save comment**. **Clear comment** removes the saved comment. This is a comments-only reference; no built-in blueprint list is supplied. Mock edits stay in memory. The terminal offers type-to-search, arrows, Enter to edit/save, F2 all/pinned, +/- adjustments and Escape to cancel/clear.
 - **F11** toggles borderless fullscreen on the current monitor; **Esc** restores the window. Fullscreen is session-only: every launch starts windowed, including when older preferences contain a fullscreen flag. Settings offers Automatic/Portrait/Landscape and a 720 × 1100 tall-window preset. Portrait stacks controls and places page navigation at the bottom. Move the window to the preferred monitor before fullscreen.
 - Theme, layout, buttons per row, automatic ship controls and optional CRT scan lines with adjustable spacing save in `%APPDATA%\Co-pit\window.json`. Mock mode requires its Settings toggle or F4; every normal launch starts with real controls disarmed.
+- At 100% interface size, Balanced sizing uses **18 px body text, 16 px supporting labels, 22 px equipment names and 20 px bold cockpit button labels**. Cards and rows use compact internal spacing, with comfortable gaps between sections. Square buttons remain 112 px. Settings > Display > Interface size scales the interface from 100% to 200%. The primary layout is 1920×1080 landscape; 1440×2560 portrait is also supported.
 - Ship, Navigation, Missions, Hardpoints, Diagnostics and Help use graphical fields, tables, cards and menus. Hardpoints has direct fire-group dropdowns for the saved manual reference. Engineering fills the available height with a scrollable material list. Display panels have illuminated corner frames, inset screens and theme-matched terminal headings; optional scan lines are confined to the screens.
 - Wails v2.17.0 uses **Microsoft WebView2 Runtime** on Windows and embedded frontend assets. The packaged app needs no Go installation or separate development server. WebView2 owns helper processes while the app is open.
 
-Build on Windows with Go 1.26+:
+## Build the desktop app
+
+From the repository root on Windows with Go 1.26+:
 
 ```powershell
 .\Build-Co-pit.ps1
@@ -28,9 +53,22 @@ Build on Windows with Go 1.26+:
 
 The script builds with the `desktop` tag and packages the control configuration, prepared binding preset and licences. It downloads pinned dependencies on first use. `go test -tags desktop ./...` checks the desktop bridge and shared core; `go test ./...` checks the terminal entry point.
 
+The current output is **build/bin/Co-pit.exe**. Executables are local build
+outputs and are not tracked in Git. Older local files named
+Co-pit-readability.exe or Co-pit-next.exe are superseded test builds.
+
+## Documentation
+
+- [Real-game setup and controls](REAL-GAME-SETUP.md)
+- [Development, both builds and verification](docs/development.md)
+- [Current sizing, responsive layouts and display checks](docs/visual-readability-implementation.md)
+- [Shutdown and input safety review](SAFETY-REVIEW.md)
+- [Test evidence and remaining manual checks](TEST-RESULTS.md)
+- [Commercial licensing](COMMERCIAL.md)
+
 ---
 
-# Elite Aux — cockpit edition
+## Elite Aux terminal companion
 
 A Go companion panel for Elite Dangerous, built with **Bubble Tea v2** and **Lip Gloss v2**. Controls are grouped into Flight & Utility, Visibility, Combat and Navigation. Gear, cargo scoop, ship lights, hardpoints and night vision report **ACTIVE / INACTIVE** from telemetry. Ship condition, power distribution, fuel, flight warnings and activity history complete the second-monitor display. The original hardware mapping remains gear L1, scoop L2, lights L3 and hardpoints L4.
 
@@ -188,7 +226,7 @@ Fuel is reported main-tank mass, not tank percentage. Power display uses the gam
 .\eliteaux.exe -help
 ```
 
-The default mode is `control`, with numpad input selected automatically. `-interval` defaults to `100ms`; larger values reduce polling frequency. Mock always requires F4, an explicit `-mode mock`, or one of the mock launchers. The F4 toggle is available in the cockpit interface. `-ui classic` opens the previous interface. `-plain` and `-once` retain text output for diagnostics/scripts. `-status PATH` selects another Status.json. The project is edited in this folder; the ZIP is a portable copy. Copies extracted elsewhere do not update automatically.
+The default mode is `control`, with numpad input selected automatically. `-interval` defaults to `100ms`; larger values reduce polling frequency. Mock always requires F4, an explicit `-mode mock`, or one of the mock launchers. The F4 toggle is available in the cockpit interface. `-ui classic` opens the previous interface. `-plain` and `-once` retain text output for diagnostics/scripts. `-status PATH` selects another Status.json. Separate source checkouts and portable copies do not update automatically; rebuild the executable in the copy you use.
 
 ## Build
 
@@ -257,6 +295,6 @@ Settings > Window & Display > Ship health display switches between Ship shield (
 
 Elite's Status feed provides shields up/down, not the player's live shield percentage. Real shields therefore show UP / % unavailable or 0% when confirmed down; the unknown fill is hatched rather than invented. Hull is the last reported Loadout/HullDamage percentage, with its report time shown. Simulator health percentages are explicitly labelled simulated. The plotted route summary sits at the bottom of the Cockpit, using reported route/target data; LY is direct distance, not summed route distance. Its Navigation button only changes pages.
 
-Ship details now occupy a full-width top row. Installed modules follow in two columns, stacking only below 600 px. Each module includes integrity, power draw in MW, priority 1–5, configured on/off snapshot and supply availability. The local ModulesInfo.json report is refreshed by opening the game's right-hand Modules panel when values change. Until a matching report exists, draw remains Unknown. Loadout priority is used when available; a matching ModulesInfo report supplies its newer priority. Report age and read errors are visible.
+Ship details occupy a full-width top row. Installed modules follow in two columns and stack when the available content width is below 44 rem (704 CSS px at 100% interface size). The threshold scales with Interface size. Each module includes integrity, power draw in MW, priority 1–5, configured on/off snapshot and supply availability. The local ModulesInfo.json report is refreshed by opening the game's right-hand Modules panel when values change. Until a matching report exists, draw remains Unknown. Loadout priority is used when available; a matching ModulesInfo report supplies its newer priority. Report age and read errors are visible.
 
 Actual power supply, power-plant output capacity and the cause of a module shutdown are not confirmed by these journal files. Supply remains Not reported; zero MW is not interpreted as disabled or overdraw. The configured switch is a loadout snapshot, not a live power diagnosis. No game bindings or controls were added by these displays.

@@ -1,6 +1,6 @@
 # Connect the panel to Elite Dangerous
 
-The app now has a real-game control mode. It reads Elite's local Status.json for feedback and uses Windows keyboard input to request actions through Elite's bindings. The journal/status interface supplies telemetry; it is not a writable command endpoint. A virtual joystick is another possible input route, but would add a device driver to this prototype.
+Co-pit desktop and Elite Aux terminal are both built from `main` and share the same real-game control backend. They read Elite's local Status.json for feedback and use Windows keyboard input to request actions through Elite's bindings. The journal/status interface supplies telemetry; it is not a writable command endpoint. Run one companion at a time because both use the same global shortcuts. See [source build instructions](docs/development.md) if you are working from a Git checkout.
 
 ## One-time setup
 
@@ -8,7 +8,7 @@ The app now has a real-game control mode. It reads Elite's local Status.json for
 2. Run **Install-Preset.cmd**. This adds **EliteAuxPanel.4.2.binds** to Elite's bindings folder. If it has already been installed unchanged, the installer does nothing. It refuses to replace a different existing EliteAuxPanel preset.
 3. Restart Elite if it was already open so it can discover the new preset.
 4. In **Options > Controls > Ship Controls**, choose **EliteAuxPanel** in the preset list and apply it. Leave the general, SRV and on-foot preset selections as they are.
-5. Open **eliteaux.exe** or **Start.cmd** (the existing **Start-Game-Control.cmd** also works). The app immediately scans for Elite and connects when your commander session is ready. Return to your ship's cockpit and close the internal/external panels, chat and maps.
+5. Open **build/bin/Co-pit.exe** or **Start-Co-pit.cmd** for desktop, or **eliteaux.exe** / **Start.cmd** for terminal (the existing **Start-Game-Control.cmd** also works). The app immediately scans for Elite and connects when your commander session is ready. Return to your ship's cockpit and close the internal/external panels, chat and maps.
 6. Turn **Num Lock on**. With Elite focused, press **Ctrl+Alt+F9** to arm. The panel on monitor two will say **ARMED**.
 7. First try **Num3** to toggle lights. The lamp changes only after the game writes the matching state. Press Num3 again to turn them back off.
 
@@ -31,7 +31,7 @@ The supplied preset was cloned from this user's Custom.4.2 HOTAS profile. Its pr
 | Num+ | Next app page (even while Elite is focused) | No game input |
 | Num- | Previous app page (even while Elite is focused) | No game input |
 
-There is no need to press Enter after these keys. **Ctrl+Alt+F9** toggles arming; **Ctrl+Alt+F10** disarms immediately. To exit, disarm, return to the app terminal and press Ctrl+C. Escape in the game retains its normal game function; it does not close the controller app.
+There is no need to press Enter after these keys. **Ctrl+Alt+F9** toggles arming; **Ctrl+Alt+F10** disarms immediately. To exit, disarm and close the Co-pit window, or return to the terminal app and press Ctrl+C. Escape in the game retains its normal game function; it does not close the controller app.
 
 Switching away from Elite pauses input and releases the ten flight-action numpad hotkeys. Returning to the same running game resumes after telemetry, bindings, closed cockpit panels and released keys are checked. Ctrl+Alt+F10, D/Stop, manual disarm, telemetry/binding/input failures, changing mode, or either application closing/crashing cancels auto-resume; press Ctrl+Alt+F9 manually again. Restarted games are distinguished by process creation time. No waiting action is replayed. The two modified arm/stop shortcuts are registered while the controller runs; a second controller instance cannot claim them. Num+ and Num- remain available for paging while disarmed and while Elite is focused; keep those two keys unbound in Elite. Optional page-key conflicts are reported in Diagnostics and do not disable flight control. Numpad flight-control conflicts are reported instead of silently proceeding.
 

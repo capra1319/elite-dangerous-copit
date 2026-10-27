@@ -1,4 +1,14 @@
-# Build verification — 24 October 2026
+# Test verification
+
+## Current merged baseline — 27 October 2026
+
+Both applications and the final Balanced sizing update are available on `main`; merge commit 38a67b7 includes the terminal and Wails histories. After resolving the merge, `go test ./...`, `go test -tags desktop ./...` and `go vet -tags desktop ./...` passed. Both worktrees were clean before this documentation update.
+
+The sizing update passed the existing 1,080-view browser matrix plus the outfitting/flight-state checks. The 1080p Cockpit destination remains visible at default scale; portrait Ship and 1080p Cockpit screenshots were inspected. The production Wails build completed as `build/bin/Co-pit.exe`. Default text is 18 px body, 16 px supporting labels, 22 px equipment names and 20 px cockpit control labels; internal spacing is compact while section gaps remain distinct.
+
+Native physical-monitor readability and live gameplay checks remain manual. The sections below are historical test records; earlier text sizes, test counts, temporary build names and branch references describe their dated revisions. For current build and verification commands see [development](docs/development.md) and [the sizing implementation](docs/visual-readability-implementation.md).
+
+## Build verification — 24 October 2026
 
 Built on Windows amd64 with Go 1.26.4, Bubble Tea v2, Lip Gloss v2 and their pinned dependencies.
 

@@ -1,6 +1,8 @@
 # Co-pit visual review and improvement plan
 
-26 October 2026 · Review only; app source and installed EXE were not changed.
+26 October 2026 · Historical review and implementation plan.
+
+Implemented and merged into `main` on 27 October 2026. The measurements and proposed sizes below describe the original review, before the final Balanced sizing adjustments. See [the current implementation](visual-readability-implementation.md) for shipped sizes, spacing and verification.
 
 The main problem is inconsistent sizing and information hierarchy. The navigation has responsive typography, while most actual information remains fixed at 10–14 CSS pixels. Panels expand into available space without keeping related information together. Decorative framing and scan lines receive more space and emphasis than some important readings.
 
